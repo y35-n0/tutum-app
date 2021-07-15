@@ -2,16 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:tutum_app/api/data_get_action.dart';
 import 'package:tutum_app/service/service.dart';
 
-import 'api/location.dart';
-
 void main() {
-  /// FIXME: 업무중일 때만 서비스처럼 작동
-  Service service;
-  service = Service(seconds: 2);
-  service.run();
   runApp(MyApp());
+
+  // FIXME: 업무중일 때만 서비스처럼 작동
+  Service service = Service(seconds: 2)..run();
 }
 
 class MyApp extends StatelessWidget {
@@ -40,10 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String longitude = '';
 
   Future<Position> _determinePosition() async {
-    await Location.setPermissionWithService();
-
-
-    return await Location.getCurrentPosition();
+    return await DataGetAction.getPosition();
   }
 
   @override
