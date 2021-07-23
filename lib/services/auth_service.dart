@@ -1,21 +1,23 @@
 import 'package:get/get.dart';
-import 'package:tutum_app/model/develop/user.dart';
+import 'package:tutum_app/models/develop/user.dart';
 
 class AuthService extends GetxService {
   static AuthService get to => Get.find();
 
-  final isLoggedIn = false.obs;
-  final LoggedInUser = User().obs;
+  final _isLoggedIn = false.obs;
+  final _loggedInUser = User().obs;
 
-  bool get isLoggedInValue => isLoggedIn.value;
+  bool get isLoggedIn => _isLoggedIn.value;
+  User get loggedInUser => _loggedInUser.value;
 
   void login(User user) {
-    isLoggedIn.value = true;
-    LoggedInUser.value = user;
+    _isLoggedIn.value = true;
+    _loggedInUser.value = user;
+    print('${user.id} ${user.name}');
   }
 
   void logout() {
-    isLoggedIn.value = false;
-    LoggedInUser.value = User();
+    _isLoggedIn.value = false;
+    _loggedInUser.value = User();
   }
 }

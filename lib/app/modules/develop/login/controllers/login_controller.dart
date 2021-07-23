@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:tutum_app/models/develop/user.dart';
+import 'package:tutum_app/services/auth_service.dart';
 
 /// 사용자 로그인 정보 비즈니스 로직
 /// 현재 테스트용 사용자 비즈니스 로직
@@ -18,13 +19,9 @@ class LoginController extends GetxController {
 
   int get selectedUserIndex => _selectedUserIndex.value;
 
-  User? get selectedUser {
-    if (_selectedUserIndex.value == -1) {
-      return null;
-    } else {
-      _users.take(_selectedUserIndex.value);
-    }
-  }
+  User get selectedUser => _selectedUserIndex.value == -1
+      ? User()
+      : _users[_selectedUserIndex.value];
 
   List<bool> get isSelected => this._isSelected;
 
@@ -53,6 +50,7 @@ class LoginController extends GetxController {
       _selectedUserIndex.value = index;
       _selectedUserId.value = _users[index].id.toInt();
       _isSelected[_selectedUserIndex.value] = true;
+      AuthService.to.login(selectedUser);
     }
   }
 
@@ -60,6 +58,7 @@ class LoginController extends GetxController {
     _isSelected[_selectedUserIndex.value] = false;
     _selectedUserIndex.value = -1;
     _selectedUserId.value = -1;
+    AuthService.to.logout();
   }
 }
 

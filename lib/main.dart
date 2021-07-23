@@ -11,6 +11,11 @@ void main() {
       // route 설정
       initialRoute: Routes.LOGIN,
       getPages: AppPages.routes,
+      initialBinding: BindingsBuilder(
+        () {
+          Get.put(AuthService());
+        },
+      ),
     ),
   );
 }
