@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:tutum_app/models/develop/user.dart';
+import 'package:tutum_app/models/user.dart';
 
 class AuthService extends GetxService {
   static AuthService get to => Get.find();

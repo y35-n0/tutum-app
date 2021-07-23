@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:tutum_app/app/modules/develop/login/controllers/login_controller.dart';
+import 'package:tutum_app/app/modules/login/controllers/login_controller.dart';
 
 class LoginBinding extends Bindings {
   @override

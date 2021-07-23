@@ -13,3 +13,8 @@ abstract class _Paths {
   static const LOGIN = '/login';
   static const SENSOR = '/sensor';
 }
+
+/// 개발용 화면 전환
+List<String> developPages = [
+  Routes.SENSOR,
+];

@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:tutum_app/models/develop/user.dart';
+import 'package:tutum_app/models/user.dart';
 import 'package:tutum_app/services/auth_service.dart';
 
 /// 사용자 로그인 정보 비즈니스 로직

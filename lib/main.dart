@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/app/routes/app_pages.dart';
 import 'package:tutum_app/services/auth_service.dart';
+import 'package:tutum_app/services/sensor/gps_service.dart';
 
 void main() {
   runApp(
@@ -14,6 +15,7 @@ void main() {
       initialBinding: BindingsBuilder(
         () {
           Get.put(AuthService());
+          Get.put(GpsService());
         },
       ),
     ),
