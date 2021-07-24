@@ -47,10 +47,9 @@
     <string>Need BLE permission</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>Need Location permission</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location when open.</string>
     <key>NSLocationAlwaysUsageDescription</key>
-    <string>Need Location permission</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Need Location permission</string>
-
+    <string>This app needs access to location when in the background.</string>
 </dict>
 </plist>
