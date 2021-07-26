@@ -14,11 +14,11 @@ class GpsTile extends StatelessWidget {
         Text('업데이트 시각', style: Theme.of(context).textTheme.subtitle1),
         Obx(() => Text('${GpsService.to.timestamp}')),
         SizedBox(
-          height: kDefaultPadding / 4,
+          height: UiConstants.PADDING / 4,
         ),
         Text('위치', style: Theme.of(context).textTheme.subtitle1),
         SizedBox(
-          height: kDefaultPadding / 4,
+          height: UiConstants.PADDING / 4,
         ),
         Obx(() => Text('경도 : ${GpsService.to.latitude}')),
         Obx(() => Text('위도 : ${GpsService.to.longitude}')),

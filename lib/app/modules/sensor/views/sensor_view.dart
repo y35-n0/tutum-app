@@ -21,13 +21,13 @@ class SensorView extends StatelessWidget {
   /// 각 센서 값을 Grid 화면에서 표시
   Widget _buildBody() {
     return Padding(
-      padding: const EdgeInsets.all(kDefaultPadding),
+      padding: const EdgeInsets.all(UiConstants.PADDING),
       child: Container(
         child: GridView(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            mainAxisSpacing: kDefaultPadding / 2,
-            crossAxisSpacing: kDefaultPadding / 2,
+            mainAxisSpacing: UiConstants.PADDING / 2,
+            crossAxisSpacing: UiConstants.PADDING / 2,
           ),
           children: <Widget>[
             GpsTile(),

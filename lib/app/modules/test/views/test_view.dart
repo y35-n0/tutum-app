@@ -14,13 +14,13 @@ class TestView extends StatelessWidget {
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(kDefaultPadding),
+        padding: const EdgeInsets.all(UiConstants.PADDING),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text('화면 이동', style: Theme.of(context).textTheme.headline6),
-              SizedBox(height: kDefaultPadding / 2),
+              SizedBox(height: UiConstants.PADDING / 2),
               ...developPages
                   .map(
                     (e) => ElevatedButton(

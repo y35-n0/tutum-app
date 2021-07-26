@@ -26,12 +26,13 @@ class BaseSensorService extends GetxService implements ServiceInterface {
   /// x초마다 데이터 가져오기
   @protected
   void readAndSendData() async {
-    Timer.periodic(Duration(seconds: kDefaultSeconds), (timer) async {
+    Timer.periodic(Duration(seconds: ServiceConstants.DURATION_SECONDS), (timer) async {
       // 타이머 종료
       if (!(_isRunning.value)) {
         timer.cancel();
       }
       await readData();
+      await sendData();
       // TODO: 센서 데이터 처리 및 전송하기
     });
   }
@@ -40,6 +41,9 @@ class BaseSensorService extends GetxService implements ServiceInterface {
   /// 가져오는 방식을 표현해야 함
   @protected
   Future<void> readData() async {}
+
+  @protected
+  Future<void> sendData() async {}
 
 // TODO: 센서 데이터 처리 및 전송하기
 }

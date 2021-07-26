@@ -16,7 +16,7 @@ class LoginView extends GetView<LoginController> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('사용자 선택', style: Theme.of(context).textTheme.headline6),
-            SizedBox(height: kDefaultPadding / 2),
+            SizedBox(height: UiConstants.PADDING / 2),
             Obx(
               () => ToggleButtons(
                 constraints: BoxConstraints.expand(
@@ -25,7 +25,7 @@ class LoginView extends GetView<LoginController> {
                 borderRadius: BorderRadius.circular(15),
                 children: controller.users
                     .map((e) => Padding(
-                          padding: const EdgeInsets.all(kDefaultPadding),
+                          padding: const EdgeInsets.all(UiConstants.PADDING),
                           child: Text('${e.id} : ${e.name}'),
                         ))
                     .toList(),

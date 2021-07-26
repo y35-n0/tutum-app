@@ -22,7 +22,7 @@ class BaseSensorTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(15),
-          boxShadow: [kDefaultShadow],
+          boxShadow: [UiConstants.BOX_SHADOW],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
