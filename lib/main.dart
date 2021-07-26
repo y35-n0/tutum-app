@@ -10,7 +10,7 @@ void main() {
       title: 'Tutum 안전관리 앱',
       defaultTransition: Transition.rightToLeft,
       // route 설정
-      initialRoute: Routes.LOGIN,
+      initialRoute: Routes.TEST,
       getPages: AppPages.routes,
       initialBinding: BindingsBuilder(
         () {

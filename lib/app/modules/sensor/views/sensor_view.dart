@@ -11,6 +11,7 @@ class SensorView extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text('센서 값 변화 확인'),
+          centerTitle: true,
         ),
         floatingActionButton: _buildFloatingActionButton(),
         body: _buildBody(),
