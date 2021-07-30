@@ -16,18 +16,18 @@ class BaseSensorTile extends StatelessWidget {
       header: GridTileBar(
         title: Text(header,
             style: Theme.of(context).textTheme.headline6,
-            textAlign: TextAlign.center),
+            textAlign: TextAlign.center
+        ),
       ),
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [UiConstants.BOX_SHADOW],
-        ),
+        padding: EdgeInsets.only(top: UiConstants.PADDING),
+        decoration: UiConstants.CONTAINER_DECORATION,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
-          children: children,
+          children:
+          [
+            ...children],
         ),
       ),
     );

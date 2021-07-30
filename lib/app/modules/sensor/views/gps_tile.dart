@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
 import 'package:tutum_app/app/modules/sensor/views/base_sensor_tile.dart';
 import 'package:tutum_app/services/sensor/gps_service.dart';
@@ -12,14 +13,12 @@ class GpsTile extends StatelessWidget {
       header: 'GPS',
       children: <Widget>[
         Text('업데이트 시각', style: Theme.of(context).textTheme.subtitle1),
-        Obx(() => Text('${GpsService.to.timestamp}')),
+        Obx(() => Text(
+            '${DateFormat('yyyy-MM-dd hh:mm:ss.SSS').format(GpsService.to.timestamp)}')),
         SizedBox(
-          height: UiConstants.PADDING / 4,
+          height: UiConstants.PADDING / 2,
         ),
         Text('위치', style: Theme.of(context).textTheme.subtitle1),
-        SizedBox(
-          height: UiConstants.PADDING / 4,
-        ),
         Obx(() => Text('경도 : ${GpsService.to.latitude}')),
         Obx(() => Text('위도 : ${GpsService.to.longitude}')),
         Obx(() => Text('고도 : ${GpsService.to.altitude}')),

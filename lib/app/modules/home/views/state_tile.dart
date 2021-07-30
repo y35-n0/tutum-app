@@ -21,27 +21,34 @@ class StatusTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       // 여백 설정
-      margin: EdgeInsets.symmetric(
-        vertical: UiConstants.PADDING / 2,
-        horizontal: UiConstants.PADDING / 2,
-      ),
       padding: EdgeInsets.symmetric(
         vertical: UiConstants.PADDING,
         horizontal: UiConstants.PADDING / 2,
       ),
       decoration: BoxDecoration(
         color: primaryColorLight,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: UiConstants.BORDER_RADIUS,
 
-        /// 이상상태 수준에 따라 그림자 색 표시
+        /// 이상상태 수준에 따라 테두리, 그림자 색 표시
+        /// 이상상태 정보가 없거나, 정상인 경우에는 미약하게 표시함.
+        border: (status.color == null ||
+                status.color == LEVEL_COLOR_MAP[LEVEL.GOOD])
+            ? null
+            : Border.all(
+                color: status.color?.withOpacity(0.4) ??
+                    LEVEL_COLOR_MAP[LEVEL.GOOD]!,
+                width: 2.5,
+              ),
         boxShadow: [
-          BoxShadow(
-            color:
-                status.color?.withOpacity(0.4) ?? LEVEL_COLOR_MAP[LEVEL.GOOD]!,
-            spreadRadius: 5,
-            blurRadius: 7,
-            offset: Offset(0, 3), // changes position of shadow
-          ),
+          (status.color == null || status.color == LEVEL_COLOR_MAP[LEVEL.GOOD])
+              ? UiConstants.BOX_SHADOW
+              : BoxShadow(
+                  color: status.color?.withOpacity(0.4) ??
+                      LEVEL_COLOR_MAP[LEVEL.GOOD]!,
+                  blurRadius: 25,
+                  spreadRadius: 1,
+                  offset: Offset(0, 2),
+                )
         ],
       ),
 
@@ -66,16 +73,18 @@ class StatusTile extends StatelessWidget {
 
         /// 상태 이상상태 수준
         child: Padding(
-          padding: const EdgeInsets.all(UiConstants.PADDING/ 2),
-          child: FittedBox(
+          padding: const EdgeInsets.all(UiConstants.PADDING / 2),
+          // child: FittedBox(
+          child: Center(
             child: Text(
               _getContentForTile(),
               style: Theme.of(context)
                   .textTheme
-                  .headline3!
+                  .headline4!
                   .copyWith(color: status.color),
               maxLines: 2,
               textAlign: TextAlign.center,
+              // ),
             ),
           ),
         ),

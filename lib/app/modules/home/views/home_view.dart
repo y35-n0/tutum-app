@@ -10,24 +10,23 @@ class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: CustomScrollView(
-      slivers: <Widget>[
-        SliverAppBar(
-          elevation: 1,
+        appBar: AppBar(
           title: Text('현재 상태'),
         ),
-        SliverPadding(
-          padding: EdgeInsets.only(top: UiConstants.PADDING / 2),
-        ),
-        SliverGrid(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+        body: Container(
+          padding: const EdgeInsets.all(UiConstants.PADDING),
+          child: GridView(
+            clipBehavior: Clip.none,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: UiConstants.PADDING / 2,
+              crossAxisSpacing: UiConstants.PADDING / 2,
+            ),
+            children: List.generate(
+                StatusService.to.length,
+                (index) => Obx(() => StatusTile(
+                    status: StatusService.to.getStatusByIndex(index)))),
           ),
-          delegate: SliverChildBuilderDelegate((_, int index) =>
-              Obx(() => StatusTile(status: StatusService.to.getStatusByIndex(index))),
-          childCount: StatusService.to.length),
-        ),
-      ],
-    ));
+        ));
   }
 }
