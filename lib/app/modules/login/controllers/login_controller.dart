@@ -17,6 +17,7 @@ class LoginController extends GetxController {
   @override
   /// [AuthService]에 저장된 로그인 정보 가져오기
   void onInit() {
+    super.onInit();
     int id = AuthService.to.loggedInUser.id.toInt();
     if (id != -1) {
       selectUserById(id);
@@ -39,7 +40,6 @@ class LoginController extends GetxController {
   void selectUserById(int id) {
     if (_selectedUserId.value == id) {
       _deselectUser();
-      return;
     } else {
       if (_selectedUserIndex.value != -1)
         _isSelected[_selectedUserIndex.value] = false;
@@ -54,14 +54,13 @@ class LoginController extends GetxController {
   void selectUserByIndex(int index) {
     if (_selectedUserIndex.value == index) {
       _deselectUser();
-      return;
     } else {
       if (_selectedUserIndex.value != -1)
         _isSelected[_selectedUserIndex.value] = false;
       _selectedUserIndex.value = index;
       _selectedUserId.value = _users[index].id.toInt();
       _isSelected[_selectedUserIndex.value] = true;
-      AuthService.to.login(selectedUser);
+      AuthService.to.login(selectedUser, manual: true);
     }
   }
 

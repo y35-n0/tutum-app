@@ -15,39 +15,37 @@ class AuthService extends GetxService {
 
   User get loggedInUser => _loggedInUser.value;
 
-  @override
+  // FIXME: 초기화 때까지 splash 스크린 표시
   /// 저장된 로그인로 초기화
+  @override
   void onInit() {
     super.onInit();
-    _getStoredTokenAndLogin();
+    _getStoredUserAndLogin();
   }
 
-
   // FIXME: 유저 정보 ->  토큰
-  void _getStoredTokenAndLogin() async {
-    String userId = await storage.read(key: 'userId') ?? '';
-    String userName = await storage.read(key: 'userName') ?? '';
-    if (userId != '' && userName != '') {
-      login(User(id: num.parse(userId), name: userName), manual: false);
+  Future<void> _getStoredUserAndLogin() async {
+    List<String> user = (await storage.read(key: 'user') ?? '').split(' ');
+    if (user.length > 1) {
+      login(User(id: num.parse(user[0]), name: user[1]));
     }
   }
 
   // FIXME: 토큰으로 서버에서 사용자 정보 가져오기
   /// 사용자 로그인, 수동로그인[manual] 일 때 로그인 정보 저장 [storage.write]
-  void login(User user, {bool manual: true}) async {
+  void login(User user, {bool manual: false}) async {
     _isLoggedIn.value = true;
     _loggedInUser.value = user;
     if (manual) {
-      await storage.write(key: 'userId', value: user.id.toString());
-      await storage.write(key: 'userName', value: user.name);
+      await storage.write(key: 'user', value: '${user.id.toString()} ${user.name}');
     }
+    print(_isLoggedIn.value.toString());
   }
 
-  /// 사용자 로그아웃, 로그인 정보 지우기 [storage.deleteAll]
+  /// 사용자 로그아웃, 로그인 정보 지우기 [storage.delete]
   void logout() async {
     _isLoggedIn.value = false;
     _loggedInUser.value = User();
-    await storage.delete(key: 'userId');
-    await storage.delete(key: 'userName');
+    await storage.delete(key: 'user');
   }
 }

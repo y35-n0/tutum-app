@@ -12,8 +12,8 @@ void main() {
       title: 'Tutum 안전관리 앱',
       defaultTransition: Transition.rightToLeftWithFade,
       // route 설정
-      initialRoute: Routes.TEST,
       getPages: AppPages.routes,
+      initialRoute: AppPages.INITIAL,
       initialBinding: BindingsBuilder(
         () {
           Get.put(AuthService());
