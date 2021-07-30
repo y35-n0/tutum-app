@@ -9,9 +9,19 @@ class LoginController extends GetxController {
   final List<User> _users = developUsers;
 
   /// -1일 때 선택된 사용자 X
-  final _selectedUserId = (-1).obs;
-  final _selectedUserIndex = (-1).obs;
-  final _isSelected = List<bool>.filled(developUsers.length, false).obs;
+  final Rx<int> _selectedUserId = (-1).obs;
+  final Rx<int> _selectedUserIndex = (-1).obs;
+  final RxList<bool> _isSelected =
+      List<bool>.filled(developUsers.length, false).obs;
+
+  @override
+  /// [AuthService]에 저장된 로그인 정보 가져오기
+  void onInit() {
+    int id = AuthService.to.loggedInUser.id.toInt();
+    if (id != -1) {
+      selectUserById(id);
+    }
+  }
 
   List<User> get users => _users;
 
@@ -25,7 +35,7 @@ class LoginController extends GetxController {
 
   List<bool> get isSelected => this._isSelected;
 
-  /// 아이디로 사용 중인 유저 선택
+  /// 아이디로 유저 선택 후 로그인
   void selectUserById(int id) {
     if (_selectedUserId.value == id) {
       _deselectUser();
@@ -36,10 +46,11 @@ class LoginController extends GetxController {
       _selectedUserId.value = id;
       _selectedUserIndex.value = _users.indexWhere((e) => e.id == id);
       _isSelected[_selectedUserIndex.value] = true;
+      AuthService.to.login(selectedUser);
     }
   }
 
-  /// 인덱스로 사용 중인 유저 선택
+  /// 인덱스로 유저 선택 후 로그인
   void selectUserByIndex(int index) {
     if (_selectedUserIndex.value == index) {
       _deselectUser();
@@ -54,6 +65,7 @@ class LoginController extends GetxController {
     }
   }
 
+  /// 선택 지우고 로그아웃
   void _deselectUser() {
     _isSelected[_selectedUserIndex.value] = false;
     _selectedUserIndex.value = -1;
