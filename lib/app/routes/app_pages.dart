@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:tutum_app/app/modules/home/views/home_view.dart';
 import 'package:tutum_app/app/modules/login/bindings/login_binding.dart';
 import 'package:tutum_app/app/modules/login/views/login_view.dart';
 import 'package:tutum_app/app/modules/sensor/views/sensor_view.dart';
@@ -13,6 +14,10 @@ class AppPages {
   static const INITIAL = Routes.LOGIN;
   static final routes = [
     GetPage(name: '/', page: () => RootView(), children: [
+      GetPage(
+        name: Routes.HOME,
+        page: () => HomeView(),
+      ),
       GetPage(
         name: Routes.TEST,
         page: () => TestView(),

@@ -4,7 +4,7 @@ import 'package:tutum_app/app/constant/custom_theme_data.dart';
 import 'package:tutum_app/app/routes/app_pages.dart';
 import 'package:tutum_app/services/auth_service.dart';
 import 'package:tutum_app/services/sensor/gps_service.dart';
-
+import 'package:tutum_app/services/status_service.dart';
 
 void main() {
   runApp(
@@ -18,6 +18,7 @@ void main() {
         () {
           Get.put(AuthService());
           Get.put(GpsService());
+          Get.put(StatusService());
         },
       ),
       theme: customThemeData,

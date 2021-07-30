@@ -24,4 +24,5 @@ List<String> developPages = [
   Routes.LOGIN,
   Routes.SENSOR,
   Routes.BLUETOOTH,
+  Routes.HOME,
 ];
