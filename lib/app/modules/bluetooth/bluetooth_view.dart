@@ -39,10 +39,18 @@ class BluetoothView extends StatelessWidget {
                                     ))
                                 .toList()),
                       ),
-                      ListTile(title: Text('Acceleration'), subtitle: Text(BTService.to.acceleration.toString())),
+                      ListTile(
+                          title: Text('Acceleration'),
+                          subtitle: Text(BTService.to.acceleration.toString())),
+                      ListTile(
+                          title: Text('Temperature'),
+                          subtitle: Text(BTService.to.temperature.toString())),
+                      ListTile(
+                          title: Text('Atmospheric'),
+                          subtitle: Text(BTService.to.pressure.toString())),
                       ElevatedButton(
-                        onPressed: () => null,
-                        child: Text('값 얻기'),
+                        onPressed: () => BTService.to.switchCharacteristicsNotify(),
+                        child: Text('실시간 값 얻기'),
                       ),
                     ]
                   : [

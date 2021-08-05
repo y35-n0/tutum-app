@@ -1,16 +1,17 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/app/constant/bluetooth_constant.dart';
 
+// FIXME: 기능 분리하기
+
 /// 블루투스 상태 관리 및 센서 상태 관리 서비스
 /// [flutterBlue] 블루투스 사용을 위한 flutter_blue 객체, [_bluetoothState] 블루투스 서비스 싱태,
 /// [_sensor] 연결된 센서 디바이스, [_sensorState] 센서 디바이스 연결 상태,
 /// [_services] 센서 디바이스의 서비스들, [_characteristics] 센서 서비스의 특성들,
-/// [_rawData] 센서 raw 데이터
+/// [_rawPressure], [_rawTemperature], [_rawAcceleration] 센서 raw 데이터
 class BTService extends GetxService {
   static BTService get to => Get.find();
 
@@ -29,6 +30,12 @@ class BTService extends GetxService {
   final RxList<int> _rawAcceleration = <int>[].obs;
   final RxList<double> _acceleration = <double>[].obs;
 
+  final RxList<int> _rawTemperature = <int>[].obs;
+  final Rx<double> _temperature = (0.0).obs;
+
+  final RxList<int> _rawPressure = <int>[].obs;
+  final Rx<double> _pressure = (0.0).obs;
+
   List<Worker> workers = [];
 
   BluetoothState get bluetoothState => _bluetoothState.value;
@@ -43,6 +50,10 @@ class BTService extends GetxService {
 
   List<double>? get acceleration => _acceleration;
 
+  double? get temperature => _temperature.value;
+
+  double? get pressure => _pressure.value;
+
   @override
   void onInit() {
     /// 블루투스 서비스 상태 관찰
@@ -53,7 +64,8 @@ class BTService extends GetxService {
     _scanResults.bindStream(flutterBlue.scanResults);
     flutterBlue.scanResults.listen((data) => _scanResults.refresh());
 
-    enrollWorker();
+    initDeviceWorker();
+    initValueWorker();
     super.onInit();
   }
 
@@ -70,8 +82,8 @@ class BTService extends GetxService {
     }
   }
 
-  /// 값이 변경되었을 때 할일 등록
-  void enrollWorker() {
+  /// 디바이스 연결할 때 필요한 값이 변경되었을 때 할일 등록
+  void initDeviceWorker() {
     workers.addAll([
       /// 블루투스 서비스가 켜지면 연결된 기기 확인 및 센서 정보 등록
       /// 블루투스 서비스가 꺼지면 센서 정보 초기화
@@ -109,20 +121,36 @@ class BTService extends GetxService {
         }
       }),
     ]);
+  }
 
-    ever(_rawAcceleration, (List<int> raw) {
-      int length = 8;
-      String tmpString = String.fromCharCodes(raw);
-      List<String> tmpList = [];
+  /// 데이터 값이 변경되었을 때 할일 등록
+  void initValueWorker() {
+    workers.addAll([
+      ever(_rawAcceleration, (List<int> raw) {
+        int length = 8;
+        String tmpString = String.fromCharCodes(raw);
+        List<String> tmpList = [];
 
-      for (int i = 0; i + length < tmpString.length; i += length + 1) {
-        tmpList.add(tmpString.substring(i, i + length));
-      }
+        for (int i = 0; i + length < tmpString.length; i += length + 1) {
+          tmpList.add(tmpString.substring(i, i + length));
+        }
 
-      _acceleration.value =
-          tmpList.map((element) => double.parse(element)).toList();
-    });
-
+        _acceleration.value =
+            tmpList.map((element) => double.parse(element)).toList();
+      }),
+      ever(_rawTemperature, (List<int> raw) {
+        if (raw.isEmpty) return;
+        ByteBuffer buffer = Int8List.fromList(raw).buffer;
+        ByteData byteData = ByteData.view(buffer);
+        _temperature.value = byteData.getFloat32(0, Endian.little);
+      }),
+      ever(_rawPressure, (List<int> raw) {
+        if (raw.isEmpty) return;
+        ByteBuffer buffer = Int8List.fromList(raw).buffer;
+        ByteData byteData = ByteData.view(buffer);
+        _pressure.value = byteData.getFloat32(0, Endian.little);
+      }),
+    ]);
   }
 
   /// 연결된 기기 확인 및 센서 정보 등록
@@ -161,7 +189,7 @@ class BTService extends GetxService {
     _characteristics = {};
   }
 
-  /// 블루투스 서비스 등록
+  /// 서비스 등록
   Future<void> _enrollServices(BluetoothDevice device) async {
     List<BluetoothService> services = await device.discoverServices();
     services.forEach((service) {
@@ -173,7 +201,7 @@ class BTService extends GetxService {
     });
   }
 
-  /// 블루투스 특성 등록
+  /// 서비스별 특성 등록
   void _enrollCharacteristics(
       int serviceIndex, BluetoothService service) async {
     List<BLECharacteristic> constCharacteristics =
@@ -187,15 +215,28 @@ class BTService extends GetxService {
       if (index != -1) {
         String name = constCharacteristics[index].name;
         _characteristics.addAll({name: characteristic});
-        await characteristic.setNotifyValue(true);
         // 특성 종류마다 바인딩
         switch (name) {
           case 'acceleration':
             _rawAcceleration.bindStream(characteristic.value);
             break;
+          case 'temperature':
+            _rawTemperature.bindStream(characteristic.value);
+            break;
+          case 'pressure':
+            _rawPressure.bindStream(characteristic.value);
+            break;
         }
       }
     });
+  }
+
+  /// 특성 notify 설정 변경
+  void switchCharacteristicsNotify() async {
+    await Future.forEach(
+        _characteristics.values,
+        (BluetoothCharacteristic c) async =>
+            await c.setNotifyValue(!(c.isNotifying)));
   }
 
   @override
