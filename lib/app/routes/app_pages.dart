@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:tutum_app/app/modules/bluetooth/bluetooth_view.dart';
 import 'package:tutum_app/app/modules/home/views/home_view.dart';
 import 'package:tutum_app/app/modules/login/bindings/login_binding.dart';
 import 'package:tutum_app/app/modules/login/views/login_view.dart';
@@ -6,6 +7,7 @@ import 'package:tutum_app/app/modules/sensor/views/sensor_view.dart';
 import 'package:tutum_app/app/modules/root/views/root_view.dart';
 import 'package:tutum_app/app/modules/test/views/test_view.dart';
 import 'package:tutum_app/app/modules/work_setting/views/work_setting_view.dart';
+import 'package:tutum_app/services/bluetooth_service.dart';
 
 part 'app_routes.dart';
 
@@ -35,6 +37,10 @@ class AppPages {
       GetPage(
         name: Routes.WORK_SETTING,
         page: () => WorkSettingView(),
+      ),
+      GetPage(
+        name: Routes.BLUETOOTH,
+        page: () => BluetoothView(),
       ),
     ])
   ];

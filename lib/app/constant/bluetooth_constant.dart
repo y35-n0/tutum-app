@@ -3,23 +3,23 @@ import 'package:flutter_blue/flutter_blue.dart';
 enum BT_SERVICE { NAME, UUID, CHARACTERISTICS }
 enum BT_CHARACTERISTIC { NAME, UUID }
 
-class BTService {
+class BLEService {
   String name;
   Guid uuid;
-  List<BTCharacteristic> characteristics;
+  List<BLECharacteristic> characteristics;
 
-  BTService(
+  BLEService(
       {required this.name, required this.uuid, required this.characteristics});
 }
 
-class BTCharacteristic {
+class BLECharacteristic {
   String name;
   Guid uuid;
 
-  BTCharacteristic({required this.name, required this.uuid});
+  BLECharacteristic({required this.name, required this.uuid});
 }
 
-class BTServices {
+class BLEServices {
   static final services = [
     // Service(
     //     name: 'information',
@@ -31,19 +31,19 @@ class BTServices {
     //           name: 'battery',
     //           uuid: Guid('ca968f45-7e09-48fc-ad1d-97fdf7b6b80f')),
     //     ]),
-    BTService(
+    BLEService(
         name: 'temperature',
         uuid: Guid('db98d81a-dc88-4cb4-bab5-f63e7067d410'),
         characteristics: [
-          BTCharacteristic(
+          BLECharacteristic(
               name: 'temperature',
               uuid: Guid('84b1893e-1979-404e-8fd6-028f8bd96553')),
         ]),
-    BTService(
+    BLEService(
         name: 'atmospheric',
         uuid: Guid('8d4a57e6-2975-4003-9f1c-88736d5555be'),
         characteristics: [
-          BTCharacteristic(
+          BLECharacteristic(
               name: 'pressure',
               uuid: Guid('37d45b9f-7d5a-44ce-ba85-ba276e7ffd9b')),
         ]),
@@ -57,17 +57,17 @@ class BTServices {
     //       Characteristic(
     //           name: 'spo2', uuid: Guid('f33bd455-d1f5-4614-bc5f-6c6e7efe5e2c')),
     //     ]),
-    BTService(
+    BLEService(
         name: 'imu',
         uuid: Guid('454607a8-4554-4e42-b15a-e96214bbb541'),
         characteristics: [
-          BTCharacteristic(
+          BLECharacteristic(
               name: 'accelerationX',
               uuid: Guid('423d7895-f0e2-43a4-ab80-12c06769dddd')),
-          BTCharacteristic(
+          BLECharacteristic(
               name: 'accelerationY',
               uuid: Guid('1db9bd2d-f0aa-4509-8c7c-9d85f4378737')),
-          BTCharacteristic(
+          BLECharacteristic(
               name: 'accelerationZ',
               uuid: Guid('290ddadd-ea0f-4126-9d45-2e3db2dd8747')),
         ]),
@@ -85,12 +85,12 @@ class BTServices {
     //     characteristics: [
     //       Characteristic(name: 'o2', uuid: Guid('')),
     //     ]),
-    BTService(name: 'risk',
+    BLEService(name: 'risk',
         uuid: Guid('7daa6fce-0e08-4cd1-a90e-7b60396a301b'),
         characteristics: [
-          BTCharacteristic(name: 'riskStatus',
+          BLECharacteristic(name: 'riskStatus',
               uuid: Guid('41e3b554-6600-4c72-a07e-e59b538b63ad')),
-          BTCharacteristic(name: 'shade_status',
+          BLECharacteristic(name: 'shade_status',
               uuid: Guid('c58967f1-03b4-42cb-a4f7-e08059d4b2b1')),
         ])
   ];
