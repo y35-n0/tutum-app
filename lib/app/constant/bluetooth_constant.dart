@@ -1,8 +1,5 @@
 import 'package:flutter_blue/flutter_blue.dart';
 
-enum BT_SERVICE { NAME, UUID, CHARACTERISTICS }
-enum BT_CHARACTERISTIC { NAME, UUID }
-
 class BLEService {
   String name;
   Guid uuid;
@@ -32,17 +29,12 @@ class BLEServices {
     //           uuid: Guid('ca968f45-7e09-48fc-ad1d-97fdf7b6b80f')),
     //     ]),
     BLEService(
-        name: 'temperature',
+        name: 'atmospheric',
         uuid: Guid('db98d81a-dc88-4cb4-bab5-f63e7067d410'),
         characteristics: [
           BLECharacteristic(
               name: 'temperature',
               uuid: Guid('84b1893e-1979-404e-8fd6-028f8bd96553')),
-        ]),
-    BLEService(
-        name: 'atmospheric',
-        uuid: Guid('8d4a57e6-2975-4003-9f1c-88736d5555be'),
-        characteristics: [
           BLECharacteristic(
               name: 'pressure',
               uuid: Guid('37d45b9f-7d5a-44ce-ba85-ba276e7ffd9b')),
@@ -62,14 +54,8 @@ class BLEServices {
         uuid: Guid('454607a8-4554-4e42-b15a-e96214bbb541'),
         characteristics: [
           BLECharacteristic(
-              name: 'accelerationX',
+              name: 'acceleration',
               uuid: Guid('423d7895-f0e2-43a4-ab80-12c06769dddd')),
-          BLECharacteristic(
-              name: 'accelerationY',
-              uuid: Guid('1db9bd2d-f0aa-4509-8c7c-9d85f4378737')),
-          BLECharacteristic(
-              name: 'accelerationZ',
-              uuid: Guid('290ddadd-ea0f-4126-9d45-2e3db2dd8747')),
         ]),
     // Service(
     //     name: 'capacity',
@@ -85,13 +71,21 @@ class BLEServices {
     //     characteristics: [
     //       Characteristic(name: 'o2', uuid: Guid('')),
     //     ]),
-    BLEService(name: 'risk',
+    BLEService(
+        name: 'risk',
         uuid: Guid('7daa6fce-0e08-4cd1-a90e-7b60396a301b'),
         characteristics: [
-          BLECharacteristic(name: 'riskStatus',
+          BLECharacteristic(
+              name: 'riskStatus',
               uuid: Guid('41e3b554-6600-4c72-a07e-e59b538b63ad')),
-          BLECharacteristic(name: 'shade_status',
+          BLECharacteristic(
+              name: 'shade_status',
               uuid: Guid('c58967f1-03b4-42cb-a4f7-e08059d4b2b1')),
         ])
   ];
+
+  static final List<String> serviceNames =
+      services.map((service) => service.name).toList();
+  static final List<Guid> serviceUuids =
+      services.map((service) => service.uuid).toList();
 }
