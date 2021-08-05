@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
@@ -7,7 +9,8 @@ import 'package:tutum_app/app/constant/bluetooth_constant.dart';
 /// 블루투스 상태 관리 및 센서 상태 관리 서비스
 /// [flutterBlue] 블루투스 사용을 위한 flutter_blue 객체, [_bluetoothState] 블루투스 서비스 싱태,
 /// [_sensor] 연결된 센서 디바이스, [_sensorState] 센서 디바이스 연결 상태,
-/// [_services] 센서 디바이스의 서비스들
+/// [_services] 센서 디바이스의 서비스들, [_characteristics] 센서 서비스의 특성들,
+/// [_rawData] 센서 raw 데이터
 class BTService extends GetxService {
   static BTService get to => Get.find();
 
@@ -23,6 +26,9 @@ class BTService extends GetxService {
   Map<int, BluetoothService> _services = {};
   Map<String, BluetoothCharacteristic> _characteristics = {};
 
+  final RxList<int> _rawAcceleration = <int>[].obs;
+  final RxList<double> _acceleration = <double>[].obs;
+
   List<Worker> workers = [];
 
   BluetoothState get bluetoothState => _bluetoothState.value;
@@ -35,6 +41,7 @@ class BTService extends GetxService {
 
   List<ScanResult> get scanResults => _scanResults;
 
+  List<double>? get acceleration => _acceleration;
 
   @override
   void onInit() {
@@ -85,7 +92,7 @@ class BTService extends GetxService {
 
       /// 등록된 센서가 없을 때 연결된 디바이스 목록에서 센서 탐색 및 정보 등록
       ever(_connectedDevices, (devices) {
-        if (_sensorState.value != BluetoothDeviceState.connected) {
+        if (_sensor.value == null) {
           _findConnectedSensor();
         }
       }),
@@ -95,25 +102,39 @@ class BTService extends GetxService {
         if (id != '') {
           _scanResults.forEach((result) async {
             if (result.device.id == DeviceIdentifier((id as String))) {
-              _connectDevice(result.device);
+              await _connectDevice(result.device);
               _findingDeviceId('');
             }
           });
         }
       }),
     ]);
+
+    ever(_rawAcceleration, (List<int> raw) {
+      int length = 8;
+      String tmpString = String.fromCharCodes(raw);
+      List<String> tmpList = [];
+
+      for (int i = 0; i + length < tmpString.length; i += length + 1) {
+        tmpList.add(tmpString.substring(i, i + length));
+      }
+
+      _acceleration.value =
+          tmpList.map((element) => double.parse(element)).toList();
+    });
+
   }
 
   /// 연결된 기기 확인 및 센서 정보 등록
-  void _findConnectedSensor() {
+  Future<void> _findConnectedSensor() async {
     _connectedDevices.forEach((device) async {
       // 연결된 센서가 있으면 센서 정보 저장
       if (device.name.startsWith('TUTUM')) {
-        _sensor(device);
+        _sensor.value = device;
         _sensorState.bindStream(device.state);
         await _enrollServices(device);
-        _services.forEach((serviceIndex, service) =>
-            _enrollCharacteristics(serviceIndex, service));
+        await Future.forEach(_services.entries,
+            (MapEntry e) => _enrollCharacteristics(e.key, e.value));
         return;
       }
     });
@@ -126,14 +147,18 @@ class BTService extends GetxService {
   /// 디바이스 연결
   void findDevice(String id) => _findingDeviceId.value = id;
 
-  void _connectDevice(BluetoothDevice device) async => await device.connect();
+  Future<void> _connectDevice(BluetoothDevice device) async {
+    await device.connect();
+  }
 
   /// 디바이스 연결 해제
   void disconnectSensor() async => await _sensor.value!.disconnect();
 
   void _resetSensor() {
-    _sensor(null);
-    _sensorState(BluetoothDeviceState.disconnected);
+    _sensor.value = null;
+    _sensorState.value = BluetoothDeviceState.disconnected;
+    _services = {};
+    _characteristics = {};
   }
 
   /// 블루투스 서비스 등록
@@ -155,13 +180,20 @@ class BTService extends GetxService {
         BLEServices.services[serviceIndex].characteristics;
 
     List<BluetoothCharacteristic> characteristics = service.characteristics;
-    characteristics.forEach((characteristic) {
+    await Future.forEach(characteristics,
+        (BluetoothCharacteristic characteristic) async {
       int index =
           constCharacteristics.indexWhere((c) => c.uuid == characteristic.uuid);
       if (index != -1) {
-        _characteristics
-            .addAll({constCharacteristics[index].name: characteristic});
-        characteristic.setNotifyValue(true);
+        String name = constCharacteristics[index].name;
+        _characteristics.addAll({name: characteristic});
+        await characteristic.setNotifyValue(true);
+        // 특성 종류마다 바인딩
+        switch (name) {
+          case 'acceleration':
+            _rawAcceleration.bindStream(characteristic.value);
+            break;
+        }
       }
     });
   }

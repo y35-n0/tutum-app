@@ -23,7 +23,7 @@ class BluetoothView extends StatelessWidget {
                       BluetoothDeviceState.connected
                   ? [
                       Text(
-                        BTService.to.sensorID!,
+                        BTService.to.sensorID ?? 'N/A',
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       ElevatedButton(
@@ -39,6 +39,11 @@ class BluetoothView extends StatelessWidget {
                                     ))
                                 .toList()),
                       ),
+                      ListTile(title: Text('Acceleration'), subtitle: Text(BTService.to.acceleration.toString())),
+                      ElevatedButton(
+                        onPressed: () => null,
+                        child: Text('값 얻기'),
+                      ),
                     ]
                   : [
                       TextField(
@@ -52,13 +57,13 @@ class BluetoothView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: () =>
-                                BTService.to.scanDevices(),
+                            onPressed: () => BTService.to.scanDevices(),
                             child: Text('디바이스 스캔'),
                           ),
                           SizedBox(width: UiConstants.PADDING),
                           ElevatedButton(
-                            onPressed: () => BTService.to.findDevice(textController.text),
+                            onPressed: () =>
+                                BTService.to.findDevice(textController.text),
                             child: Text('센서 연결'),
                           ),
                         ],
