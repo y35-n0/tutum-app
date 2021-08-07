@@ -127,14 +127,8 @@ class BTService extends GetxService {
   void initValueWorker() {
     workers.addAll([
       ever(_rawAcceleration, (List<int> raw) {
-        int length = 8;
         String tmpString = String.fromCharCodes(raw);
-        List<String> tmpList = [];
-
-        for (int i = 0; i + length < tmpString.length; i += length + 1) {
-          tmpList.add(tmpString.substring(i, i + length));
-        }
-
+        List<String> tmpList = tmpString.split(' ').sublist(0, 3);
         _acceleration.value =
             tmpList.map((element) => double.parse(element)).toList();
       }),
@@ -157,12 +151,14 @@ class BTService extends GetxService {
   Future<void> _findConnectedSensor() async {
     _connectedDevices.forEach((device) async {
       // 연결된 센서가 있으면 센서 정보 저장
-      if (device.name.startsWith('TUTUM')) {
+      // FIXME: Arduino 빼기
+      if (device.name.startsWith('TUTUM') || device.name.startsWith('Arduino')) {
         _sensor.value = device;
         _sensorState.bindStream(device.state);
         await _enrollServices(device);
         await Future.forEach(_services.entries,
             (MapEntry e) => _enrollCharacteristics(e.key, e.value));
+        await device.requestMtu(128);
         return;
       }
     });
