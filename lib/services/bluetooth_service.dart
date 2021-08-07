@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/app/constant/bluetooth_constant.dart';
+import 'package:tutum_app/services/sensor/base_sensor_service.dart';
 
 // FIXME: 기능 분리하기
 
@@ -12,7 +14,7 @@ import 'package:tutum_app/app/constant/bluetooth_constant.dart';
 /// [_sensor] 연결된 센서 디바이스, [_sensorState] 센서 디바이스 연결 상태,
 /// [_services] 센서 디바이스의 서비스들, [_characteristics] 센서 서비스의 특성들,
 /// [_rawPressure], [_rawTemperature], [_rawAcceleration] 센서 raw 데이터
-class BTService extends GetxService {
+class BTService extends BaseSensorService {
   static BTService get to => Get.find();
 
   final FlutterBlue flutterBlue = FlutterBlue.instance;
@@ -38,6 +40,8 @@ class BTService extends GetxService {
 
   List<Worker> workers = [];
 
+  final Rx<bool> _isRunning = false.obs;
+
   BluetoothState get bluetoothState => _bluetoothState.value;
 
   BluetoothDeviceState get sensorState => _sensorState.value;
@@ -53,6 +57,8 @@ class BTService extends GetxService {
   double? get temperature => _temperature.value;
 
   double? get pressure => _pressure.value;
+
+  bool get isRunning => _isRunning.value;
 
   @override
   void onInit() {
@@ -120,6 +126,13 @@ class BTService extends GetxService {
           });
         }
       }),
+
+      ever(_isRunning, (bool isRunning) async {
+        await Future.forEach(
+            _characteristics.values,
+            (BluetoothCharacteristic c) async =>
+                await c.setNotifyValue(isRunning));
+      }),
     ]);
   }
 
@@ -127,6 +140,7 @@ class BTService extends GetxService {
   void initValueWorker() {
     workers.addAll([
       ever(_rawAcceleration, (List<int> raw) {
+        if (raw.isEmpty) return;
         String tmpString = String.fromCharCodes(raw);
         List<String> tmpList = tmpString.split(' ').sublist(0, 3);
         _acceleration.value =
@@ -152,13 +166,14 @@ class BTService extends GetxService {
     _connectedDevices.forEach((device) async {
       // 연결된 센서가 있으면 센서 정보 저장
       // FIXME: Arduino 빼기
-      if (device.name.startsWith('TUTUM') || device.name.startsWith('Arduino')) {
+      if (device.name.startsWith('TUTUM') ||
+          device.name.startsWith('Arduino')) {
         _sensor.value = device;
         _sensorState.bindStream(device.state);
         await _enrollServices(device);
         await Future.forEach(_services.entries,
             (MapEntry e) => _enrollCharacteristics(e.key, e.value));
-        await device.requestMtu(128);
+        if (Platform.isAndroid) await device.requestMtu(128);
         return;
       }
     });
@@ -228,11 +243,18 @@ class BTService extends GetxService {
   }
 
   /// 특성 notify 설정 변경
-  void switchCharacteristicsNotify() async {
-    await Future.forEach(
-        _characteristics.values,
-        (BluetoothCharacteristic c) async =>
-            await c.setNotifyValue(!(c.isNotifying)));
+  void switchCharacteristicsNotify([bool? isNotifying]) async {
+    _isRunning.value = isNotifying ?? !_isRunning.value;
+  }
+
+  @override
+  void run() {
+    _isRunning.value = true;
+  }
+
+  @override
+  void stop() {
+    _isRunning.value = false;
   }
 
   @override
