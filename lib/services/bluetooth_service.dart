@@ -172,7 +172,7 @@ class BTService extends BaseSensorService {
         _sensorState.bindStream(device.state);
         await _enrollServices(device);
         await Future.forEach(_services.entries,
-            (MapEntry e) => _enrollCharacteristics(e.key, e.value));
+            (MapEntry e) async => await _enrollCharacteristics(e.key, e.value));
         if (Platform.isAndroid) await device.requestMtu(128);
         return;
       }
@@ -213,7 +213,7 @@ class BTService extends BaseSensorService {
   }
 
   /// 서비스별 특성 등록
-  void _enrollCharacteristics(
+  Future<void> _enrollCharacteristics(
       int serviceIndex, BluetoothService service) async {
     List<BLECharacteristic> constCharacteristics =
         BLEServices.services[serviceIndex].characteristics;
