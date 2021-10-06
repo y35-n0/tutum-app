@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:tutum_app/app/constant/custom_theme_data.dart';
 import 'package:tutum_app/app/routes/app_pages.dart';
 import 'package:tutum_app/services/auth_service.dart';
-import 'package:tutum_app/services/bluetooth_service.dart';
+import 'package:tutum_app/services/ble_service.dart';
 import 'package:tutum_app/services/sensor/gps_service.dart';
 import 'package:tutum_app/services/status_service.dart';
 
@@ -20,7 +20,7 @@ void main() {
           Get.put(AuthService());
           Get.put(GpsService());
           Get.put(StatusService());
-          Get.put(BTService());
+          Get.put(BleService());
         },
       ),
       theme: customThemeData,

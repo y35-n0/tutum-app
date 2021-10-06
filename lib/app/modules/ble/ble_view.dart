@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
-import 'package:tutum_app/services/bluetooth_service.dart';
+import 'package:tutum_app/services/ble_service.dart';
 
-class BluetoothView extends StatelessWidget {
+class BleView extends StatelessWidget {
   final textController = TextEditingController();
 
   @override
@@ -19,20 +19,20 @@ class BluetoothView extends StatelessWidget {
           child: Obx(
             () => Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: BTService.to.sensorState ==
+              children: BleService.to.sensorState ==
                       BluetoothDeviceState.connected
                   ? [
                       Text(
-                        BTService.to.sensorID ?? 'N/A',
+                        BleService.to.sensorID ?? 'N/A',
                         style: Theme.of(context).textTheme.headline6,
                       ),
                       ElevatedButton(
-                        onPressed: () => BTService.to.disconnectSensor(),
+                        onPressed: () => BleService.to.disconnectSensor(),
                         child: Text('연결 해제'),
                       ),
                       Expanded(
                         child: ListView(
-                            children: BTService.to.connectedDevices
+                            children: BleService.to.connectedDevices
                                 .map((device) => ListTile(
                                       title: Text(device.name),
                                       subtitle: Text(device.id.toString()),
@@ -41,15 +41,15 @@ class BluetoothView extends StatelessWidget {
                       ),
                       ListTile(
                           title: Text('Acceleration'),
-                          subtitle: Text(BTService.to.acceleration.toString())),
+                          subtitle: Text(BleService.to.acceleration.toString())),
                       ListTile(
                           title: Text('Temperature'),
-                          subtitle: Text(BTService.to.temperature.toString())),
+                          subtitle: Text(BleService.to.temperature.toString())),
                       ListTile(
                           title: Text('Atmospheric'),
-                          subtitle: Text(BTService.to.pressure.toString())),
+                          subtitle: Text(BleService.to.pressure.toString())),
                       ElevatedButton(
-                        onPressed: () => BTService.to.switchCharacteristicsNotify(),
+                        onPressed: () => BleService.to.switchCharacteristicsNotify(),
                         child: Text('실시간 값 얻기'),
                       ),
                     ]
@@ -65,20 +65,20 @@ class BluetoothView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: () => BTService.to.scanDevices(),
+                            onPressed: () => BleService.to.scanDevices(),
                             child: Text('디바이스 스캔'),
                           ),
                           SizedBox(width: UiConstants.PADDING),
                           ElevatedButton(
                             onPressed: () =>
-                                BTService.to.findDevice(textController.text),
+                                BleService.to.findDevice(textController.text),
                             child: Text('센서 연결'),
                           ),
                         ],
                       ),
                       Expanded(
                           child: ListView(
-                              children: BTService.to.scanResults.map((result) {
+                              children: BleService.to.scanResults.map((result) {
                         return ListTile(
                             title: Text(result.device.name),
                             subtitle: Text(result.device.id.toString()),

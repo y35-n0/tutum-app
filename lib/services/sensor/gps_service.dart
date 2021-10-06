@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:tutum_app/app/middleware/gps_middleware.dart';
+import 'package:tutum_app/app/api/gps_api.dart';
 import 'package:tutum_app/models/gps.dart';
 import 'package:tutum_app/services/sensor/base_sensor_service.dart';
 
@@ -17,6 +17,6 @@ class GpsService extends BaseSensorService {
   double get altitude => _gps.value.altitude;
 
   Future<void> readData() async {
-    _gps.value = await GpsMiddleware.fetchGps();
+    _gps.value = await GpsApi.fetchGps();
   }
 }

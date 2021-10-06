@@ -2,7 +2,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:system_settings/system_settings.dart';
 
 /// 권한 관리
-class PermissionGetAction {
+class PermissionApi {
   /// 서비스가 포함된 권한에 대해 설정
   static Future<bool> setPermissionWithService(
       PermissionWithService targetPermission) async {

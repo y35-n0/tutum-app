@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
 import 'package:tutum_app/app/modules/sensor/views/gps_tile.dart';
-import 'package:tutum_app/services/bluetooth_service.dart';
+import 'package:tutum_app/services/ble_service.dart';
 import 'package:tutum_app/services/sensor/base_sensor_service.dart';
 import 'package:tutum_app/services/sensor/gps_service.dart';
 import 'package:get/get.dart';
@@ -40,7 +40,7 @@ class SensorView extends StatelessWidget {
 
   Widget _buildFloatingActionButton() {
     return Obx(() {
-      List<BaseSensorService> services = [GpsService.to, BTService.to];
+      List<BaseSensorService> services = [GpsService.to, BleService.to];
       bool isRunning = services.every((e) => e.isRunning);
 
       return FloatingActionButton(

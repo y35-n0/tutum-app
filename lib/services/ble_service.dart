@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
-import 'package:tutum_app/app/constant/bluetooth_constant.dart';
+import 'package:tutum_app/app/constant/ble_constant.dart';
 import 'package:tutum_app/services/sensor/base_sensor_service.dart';
 
 // FIXME: 기능 분리하기
@@ -14,8 +14,8 @@ import 'package:tutum_app/services/sensor/base_sensor_service.dart';
 /// [_sensor] 연결된 센서 디바이스, [_sensorState] 센서 디바이스 연결 상태,
 /// [_services] 센서 디바이스의 서비스들, [_characteristics] 센서 서비스의 특성들,
 /// [_rawPressure], [_rawTemperature], [_rawAcceleration] 센서 raw 데이터
-class BTService extends BaseSensorService {
-  static BTService get to => Get.find();
+class BleService extends BaseSensorService {
+  static BleService get to => Get.find();
 
   final FlutterBlue flutterBlue = FlutterBlue.instance;
   final Rx<BluetoothState> _bluetoothState = BluetoothState.unknown.obs;
@@ -172,7 +172,7 @@ class BTService extends BaseSensorService {
         _sensorState.bindStream(device.state);
         await _enrollServices(device);
         await Future.forEach(_services.entries,
-            (MapEntry e) async => await _enrollCharacteristics(e.key, e.value));
+            (MapEntry e) => _enrollCharacteristics(e.key, e.value));
         if (Platform.isAndroid) await device.requestMtu(128);
         return;
       }
@@ -213,7 +213,7 @@ class BTService extends BaseSensorService {
   }
 
   /// 서비스별 특성 등록
-  Future<void> _enrollCharacteristics(
+  void _enrollCharacteristics(
       int serviceIndex, BluetoothService service) async {
     List<BLECharacteristic> constCharacteristics =
         BLEServices.services[serviceIndex].characteristics;

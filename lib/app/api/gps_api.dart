@@ -10,6 +10,7 @@ class GpsApi {
       return Future.error('No permission');
     }
 
+
     // TODO: 통신음영이거나 값이 없을 때 방안 추가
     // FIXME: iOS에서 값이 업데이트 되지 않음
     Position position = await Geolocator.getCurrentPosition(
