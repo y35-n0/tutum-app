@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
-import 'package:tutum_app/app/modules/sensor/views/gps_tile.dart';
-import 'package:tutum_app/services/ble_service.dart';
+import 'package:tutum_app/services/beacon_service.dart';
 import 'package:tutum_app/services/sensor/base_sensor_service.dart';
-import 'package:tutum_app/services/sensor/gps_service.dart';
 import 'package:get/get.dart';
 
 class SensorView extends StatelessWidget {
@@ -31,7 +29,6 @@ class SensorView extends StatelessWidget {
           crossAxisSpacing: UiConstants.PADDING / 2,
         ),
         children: <Widget>[
-          GpsTile(),
           // TODO: 다른 센서 값 타일도 표시
         ],
       ),
@@ -40,7 +37,7 @@ class SensorView extends StatelessWidget {
 
   Widget _buildFloatingActionButton() {
     return Obx(() {
-      List<BaseSensorService> services = [GpsService.to, BleService.to];
+      List<BaseSensorService> services = [BeaconService.to];
       bool isRunning = services.every((e) => e.isRunning);
 
       return FloatingActionButton(

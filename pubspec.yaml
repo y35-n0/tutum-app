@@ -28,6 +28,7 @@ dependencies:
 
 
   flutter_blue: 0.8.0
+  flutter_bluetooth_serial: 0.4.0
 
   flutter_local_notifications: 8.0.0
 
