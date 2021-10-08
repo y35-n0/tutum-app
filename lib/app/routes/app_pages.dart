@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:tutum_app/app/modules/test/sensor_test_view.dart';
+import 'package:tutum_app/app/modules/test/sensor_connect_test_view.dart';
 import 'package:tutum_app/app/modules/test/beacon_test_view.dart';
 import 'package:tutum_app/app/modules/home/views/home_view.dart';
 import 'package:tutum_app/app/modules/login/bindings/login_binding.dart';
@@ -39,8 +39,8 @@ class AppPages {
         page: () => BeaconTestView(),
       ),
       GetPage(
-        name: Routes.SENSOR,
-        page: () => SensorTestView(),
+        name: Routes.SENSOR_CONNECT,
+        page: () => SensorConnectTestView(),
       ),
     ])
   ];

@@ -8,8 +8,8 @@ abstract class Routes {
   static const LOGIN = _Paths.TEST + _Paths.LOGIN;
   static const WORK_SETTING = _Paths.TEST + _Paths.WORK_SETTING;
   static const BEACON = _Paths.TEST + _Paths.BEACON;
-  static const SENSOR = _Paths.TEST + _Paths.SENSOR;
-
+  static const SENSOR_CONNECT = _Paths.TEST + _Paths.SENSOR_CONNECT;
+  static const SENSOR_PARSING = _Paths.TEST + _Paths.SENSOR_PARSING;
 }
 
 abstract class _Paths {
@@ -18,7 +18,8 @@ abstract class _Paths {
   static const LOGIN = '/login';
   static const WORK_SETTING = '/work_setting';
   static const BEACON = '/beacon';
-  static const SENSOR = '/sensor';
+  static const SENSOR_CONNECT = '/sensor_connect';
+  static const SENSOR_PARSING = '/sensor_parsing';
 }
 
 /// 개발용 화면 전환
@@ -27,5 +28,5 @@ List<String> developPages = [
   Routes.HOME,
   Routes.WORK_SETTING,
   Routes.BEACON,
-  Routes.SENSOR,
+  Routes.SENSOR_CONNECT,
 ];
