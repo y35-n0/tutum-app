@@ -1,15 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:tutum_app/app/modules/test/views/sensors_test_view.dart';
-import 'package:tutum_app/app/modules/test/views/beacon_test_view.dart';
+import 'package:tutum_app/app/modules/test/sensor_test_view.dart';
+import 'package:tutum_app/app/modules/test/beacon_test_view.dart';
 import 'package:tutum_app/app/modules/home/views/home_view.dart';
 import 'package:tutum_app/app/modules/login/bindings/login_binding.dart';
 import 'package:tutum_app/app/modules/login/views/login_view.dart';
-import 'package:tutum_app/app/modules/sensor/views/sensor_view.dart';
 import 'package:tutum_app/app/modules/root/views/root_view.dart';
-import 'package:tutum_app/app/modules/test/views/test_view.dart';
+import 'package:tutum_app/app/modules/test/test_view.dart';
 import 'package:tutum_app/app/modules/work_setting/views/work_setting_view.dart';
-import 'package:tutum_app/services/beacon_service.dart';
 
 part 'app_routes.dart';
 
@@ -39,6 +37,10 @@ class AppPages {
       GetPage(
         name: Routes.BEACON,
         page: () => BeaconTestView(),
+      ),
+      GetPage(
+        name: Routes.SENSOR,
+        page: () => SensorTestView(),
       ),
     ])
   ];
