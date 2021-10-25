@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
 import 'package:tutum_app/services/beacon_service.dart';
-import 'package:tutum_app/services/sensor/base_sensor_service.dart';
 import 'package:get/get.dart';
 
 class SensorView extends StatelessWidget {
@@ -37,17 +36,17 @@ class SensorView extends StatelessWidget {
 
   Widget _buildFloatingActionButton() {
     return Obx(() {
-      List<BaseSensorService> services = [BeaconService.to];
-      bool isRunning = services.every((e) => e.isRunning);
+      // List<BaseSensorService> services = [BeaconService.to];
+      bool isRunning = false; // services.every((e) => e.isRunning);
 
       return FloatingActionButton(
         // TODO: 센서 값 변화 시작
         onPressed: () {
-          if (isRunning) {
-            services.forEach((e) => e.stop());
-          } else {
-            services.forEach((e) => e.run());
-          }
+          // if (isRunning) {
+          //   services.forEach((e) => e.stop());
+          // } else {
+          //   services.forEach((e) => e.run());
+          // }
         },
         child: isRunning ? Icon(Icons.stop) : Icon(Icons.play_arrow),
       );

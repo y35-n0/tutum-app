@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:intl/intl.dart';
 import 'package:tutum_app/app/constant/custom_theme_data.dart';
-import 'package:tutum_app/app/constant/status_level_constants.dart';
+import 'package:tutum_app/app/constant/abnormal_state_constants.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
-import 'package:tutum_app/models/status.dart';
+import 'package:tutum_app/models/state.dart';
 
 // FIXME: 근무 상태가 아닐 때 모두 회색으로 표시
 
-/// 상태[status]를 표시할 타일
-/// 상태 종류[status.name], 상태 내용[status.content],
-/// 상태 이상상태 수준[status.level], 변경 시각[status.datetime]을 표시.
-/// 이상상태 수준에 따라 타일의 색[status.color]을 다르게 함.
+/// 상태[state]를 표시할 타일
+/// 상태 종류[state.name], 상태 내용[state.content],
+/// 상태 이상상태 수준[state.level], 변경 시각[state.datetime]을 표시.
+/// 이상상태 수준에 따라 타일의 색[state.color]을 다르게 함.
 class StatusTile extends StatelessWidget {
-  const StatusTile({Key? key, required this.status}) : super(key: key);
+  const StatusTile({Key? key, required this.state}) : super(key: key);
 
-  final Status status;
+  final AbnormalState state;
 
   @override
   Widget build(BuildContext context) {
@@ -31,19 +31,19 @@ class StatusTile extends StatelessWidget {
 
         /// 이상상태 수준에 따라 테두리, 그림자 색 표시
         /// 이상상태 정보가 없거나, 정상인 경우에는 미약하게 표시함.
-        border: (status.color == null ||
-                status.color == LEVEL_COLOR_MAP[LEVEL.GOOD])
+        border: (state.color == null ||
+                state.color == LEVEL_COLOR_MAP[LEVEL.GOOD])
             ? null
             : Border.all(
-                color: status.color?.withOpacity(0.4) ??
+                color: state.color?.withOpacity(0.4) ??
                     LEVEL_COLOR_MAP[LEVEL.GOOD]!,
                 width: 2.5,
               ),
         boxShadow: [
-          (status.color == null || status.color == LEVEL_COLOR_MAP[LEVEL.GOOD])
+          (state.color == null || state.color == LEVEL_COLOR_MAP[LEVEL.GOOD])
               ? UiConstants.BOX_SHADOW
               : BoxShadow(
-                  color: status.color?.withOpacity(0.4) ??
+                  color: state.color?.withOpacity(0.4) ??
                       LEVEL_COLOR_MAP[LEVEL.GOOD]!,
                   blurRadius: 25,
                   spreadRadius: 1,
@@ -55,7 +55,7 @@ class StatusTile extends StatelessWidget {
       child: GridTile(
         /// 상태 종류
         header: Text(
-          status.name,
+          state.name,
           style: Theme.of(context).textTheme.headline6,
           textAlign: TextAlign.center,
         ),
@@ -63,10 +63,10 @@ class StatusTile extends StatelessWidget {
         /// 상태 변경 시각
         footer: Center(
           child: Text(
-            status.datetime == null
+            state.datetime == null
                 ? 'NULL'
                 : DateFormat('yyyy-MM-dd hh:mm:ss.SSS')
-                    .format(status.datetime!),
+                    .format(state.datetime!),
             textAlign: TextAlign.center,
           ),
         ),
@@ -81,7 +81,7 @@ class StatusTile extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .headline4!
-                  .copyWith(color: status.color),
+                  .copyWith(color: state.color),
               maxLines: 2,
               textAlign: TextAlign.center,
               // ),
@@ -94,7 +94,7 @@ class StatusTile extends StatelessWidget {
 
   /// 상태 내용 수정 (null 처리, 줄 바꿈)
   String _getContentForTile() {
-    switch (status.content) {
+    switch (state.content) {
       case null:
         return 'NULL';
       case '매우 심한 저산소증':
@@ -104,7 +104,7 @@ class StatusTile extends StatelessWidget {
       case '산소 부족':
         return '산소\n부족';
       default:
-        return status.content!;
+        return state.content!;
     }
   }
 }

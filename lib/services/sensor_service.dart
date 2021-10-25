@@ -4,15 +4,13 @@ import 'dart:typed_data';
 
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:get/get.dart';
-import 'package:tutum_app/services/sensor/base_sensor_service.dart';
 import 'dart:developer';
-import 'package:f_logs/f_logs.dart';
 
 const SENSOR_NAME = "TUTUM";
 
 /// [_bluetoothState] 블루투스 상태, [_sensor] 연결된 센서, [_connection] 연결 정보
 /// [_isDiscovering] 스캔 중 여부
-class SensorService extends BaseSensorService {
+class SensorService extends GetxService {
   static SensorService get to => Get.find();
 
   // 블루투스 관련

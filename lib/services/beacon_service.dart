@@ -1,7 +1,6 @@
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/models/beacon.dart';
-import 'package:tutum_app/services/sensor/base_sensor_service.dart';
 
 const SCAN_DURATION = Duration(days: 1);
 const DEVICE_NAME = "TUTUM";
@@ -10,7 +9,7 @@ const DEVICE_NAME = "TUTUM";
 /// [_flutterBlue] 블루투스 사용을 위한 flutter_blue 객체
 /// [_isScanning]  scan 기능 활성화 유무 [_isRunning] 시스템 작동 여부
 /// [_scanResult] 현재 탐색된 디바이스, [_beacons] 탐지된 beacons
-class BeaconService extends BaseSensorService {
+class BeaconService extends GetxService {
   static BeaconService get to => Get.find();
 
   final FlutterBlue _flutterBlue = FlutterBlue.instance;
@@ -70,7 +69,6 @@ class BeaconService extends BaseSensorService {
   }
 
   /// Beacon 스캔 시작
-  @override
   void run() {
     if (!isRunning) {
       _beacons.value = [];
@@ -83,7 +81,6 @@ class BeaconService extends BaseSensorService {
   }
 
   /// Beacon 스캔 종료
-  @override
   void stop() {
     if (isRunning) {
       _flutterBlue.stopScan();

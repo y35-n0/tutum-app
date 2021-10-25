@@ -23,7 +23,6 @@ class AuthService extends GetxService {
   }
 
 
-  // FIXME: 유저 정보 ->  토큰
   void _getStoredTokenAndLogin() async {
     String userId = await storage.read(key: 'userId') ?? '';
     String userName = await storage.read(key: 'userName') ?? '';
@@ -32,7 +31,6 @@ class AuthService extends GetxService {
     }
   }
 
-  // FIXME: 토큰으로 서버에서 사용자 정보 가져오기
   /// 사용자 로그인, 수동로그인[manual] 일 때 로그인 정보 저장 [storage.write]
   void login(User user, {bool manual: true}) async {
     _isLoggedIn.value = true;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tutum_app/app/constant/status_level_constants.dart';
+import 'package:tutum_app/app/constant/abnormal_state_constants.dart';
 
-class Status {
-  Status({
+class AbnormalState {
+  AbnormalState({
     required this.name,
     this.datetime,
     this.content,
