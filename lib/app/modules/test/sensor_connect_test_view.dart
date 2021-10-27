@@ -45,10 +45,10 @@ class SensorConnectTestView extends StatelessWidget {
           children: [
             SensorService.to.isDiscovering
                 ? ElevatedButton(
-                    onPressed: () => SensorService.to.cancelDiscovery(),
+                    onPressed: () => SensorService.to.stopFindingDevices(),
                     child: const Text("디바이스 스캔 종료"))
                 : ElevatedButton(
-                    onPressed: () => SensorService.to.startDiscovery(),
+                    onPressed: () => SensorService.to.startFindingDevices(),
                     child: const Text("디바이스 스캔 시작")),
             SizedBox(width: UiConstants.PADDING),
             ElevatedButton(
@@ -60,15 +60,16 @@ class SensorConnectTestView extends StatelessWidget {
           ],
         ),
         Expanded(
-            child: ListView(
-                children: SensorService.to.discoveredResults.map((result) {
-          return ListTile(
-              title: Text(result.device.name ?? ''),
-              subtitle: Text(result.device.address),
-              onTap: () {
-                textController.text = result.device.address;
-              });
-        }).toList())),
+          child: ListView(
+              children: SensorService.to.devices
+                  .map((device) => ListTile(
+                      title: Text(device.name),
+                      subtitle: Text(device.address),
+                      onTap: () {
+                        textController.text = device.address;
+                      }))
+                  .toList()),
+        ),
       ];
     }
   }

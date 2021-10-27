@@ -1,15 +1,23 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:get/get.dart';
 import 'dart:developer';
 
-const SENSOR_NAME = "TUTUM";
+import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
+import 'package:tutum_app/models/device.dart';
 
-/// [_bluetoothState] 블루투스 상태, [_sensor] 연결된 센서, [_connection] 연결 정보
-/// [_isDiscovering] 스캔 중 여부
+// FIXME: TUTM => TUTUM
+const SENSOR_NAME = "TUTM";
+const DISCOVERY_DURATION_SECONDS = 10;
+const TRY_CONNECT_DURATION_SECONDS = 5;
+const TRY_CONNECT_INTERVAL_SECONDS = 1;
+
+/// [_bluetoothState] 블루투스 상태, [isEnable] 블루투스 사용 가능 여부, [_isDiscovering] 스캔 중 여부,
+/// [_address] 연결된 센서 주소, [_connection] 센서 연결 정보
+/// [_rawData] Raw Data, [_dataWorker] raw data를 처리할 워커
+
 class SensorService extends GetxService {
   static SensorService get to => Get.find();
 
@@ -17,45 +25,83 @@ class SensorService extends GetxService {
   final FlutterBluetoothSerial _flutterBluetoothSerial =
       FlutterBluetoothSerial.instance;
   final Rx<BluetoothState> _bluetoothState = BluetoothState.UNKNOWN.obs;
+
   final Rx<bool> _isDiscovering = false.obs;
 
   // 센서 관련
-  final Rxn<BluetoothDevice> _sensor = Rxn<BluetoothDevice>();
+  final Rx<String> _address = "".obs;
+  final Rx<String> _name = "".obs;
   final Rxn<BluetoothConnection> _connection = Rxn<BluetoothConnection>();
 
-  // 값 관련
-  final Rxn<Uint8List> _rawData = Rxn<Uint8List>();
-  Worker? _dataWorker;
-
-  // for test page
-  final RxMap<String, BluetoothDiscoveryResult> _discoveredResultsMap =
-      Map<String, BluetoothDiscoveryResult>().obs;
-
+  // 데이터 관련
+  final RxList<Uint8List> _rawData = <Uint8List>[].obs;
   bool get isEnabled => _bluetoothState.value == BluetoothState.STATE_ON;
 
   bool get isDiscovering => _isDiscovering.value;
 
-  BluetoothDevice? get sensor => _sensor.value;
+  String get sensorAddress => _address.value;
 
-  // for test page
-  List<BluetoothDiscoveryResult> get discoveredResults =>
-      _discoveredResultsMap.values.toList();
+  String get sensorName => _name.value;
+
+  bool get sensorIsConnected => _connection.value?.isConnected ?? false;
+
+  // 연결된 기기
+  final RxMap<String, BluetoothDevice> _bondedDevicesMap =
+      Map<String, BluetoothDevice>().obs;
+  final RxMap<String, BluetoothDiscoveryResult> _discoveredResultsMap =
+      Map<String, BluetoothDiscoveryResult>().obs;
+
+  List<Device> get devices => getDevices();
 
   @override
-  void onInit() {
+  void onInit() async {
+    super.onInit();
+
+    /// listen bluetooth states
     _flutterBluetoothSerial.state.then((state) {
       _bluetoothState.value = state;
     });
     _bluetoothState.bindStream(_flutterBluetoothSerial.onStateChanged());
 
-    ever(_bluetoothState, (state) => {print(state)});
-    super.onInit();
+    _flutterBluetoothSerial.setPairingRequestHandler(
+      (BluetoothPairingRequest request) {
+        if (request.pairingVariant == PairingVariant.Pin) {
+          return Future.value("$PAIRING_PIN");
+        } else {
+          return Future.value(null);
+        }
+      },
+    );
   }
 
-  // for test page
-  /// 기기 탐색 및 정보 저장
-  void startDiscovery() async {
-    await cancelDiscovery();
+  /// 주변 기기 탐색 시작
+  void startFindingDevices() async {
+    Timer(Duration(seconds: DISCOVERY_DURATION_SECONDS), () {
+      _stopDiscovery();
+    });
+
+    _startDiscovery();
+    _findBondedDevices();
+  }
+
+  /// 주변 기기 탐색 종료
+  void stopFindingDevices() {
+    _stopDiscovery();
+  }
+
+  /// 기기 목록
+  List<Device> getDevices() {
+    List<Device> devices = [];
+    devices.addAll(_bondedDevicesMap.values
+        .map((device) => Device.fromBluetoothDeviceOfFBS(device)));
+    devices.addAll(_discoveredResultsMap.values
+        .map((result) => Device.fromBluetoothDiscoveryResult(result)));
+    return devices;
+  }
+
+  /// 신규 기기 탐색 시작
+  Future<void> _startDiscovery() async {
+    if (isDiscovering) await _stopDiscovery();
     _discoveredResultsMap.clear();
 
     _isDiscovering.value = true;
@@ -72,83 +118,115 @@ class SensorService extends GetxService {
     );
   }
 
-  /// 탐색 종료
-  Future<void> cancelDiscovery() async {
+  /// 신규 기기 탐색 종료
+  Future<void> _stopDiscovery() async {
     if (isDiscovering) {
       await _flutterBluetoothSerial.cancelDiscovery();
+      _isDiscovering.value = false;
     }
   }
 
-  // FIXME: 원활하게 진행되는지 센서를 연결해서 확인해 봐야함.
-  // FIXME: scan 시, FlutterBlue 영향을 받는 것 같음. FlutterBlue의 scan으로 대체할 수 있도록 해야 함.
+  /// 연결된 기기 탐색
+  Future<void> _findBondedDevices() async {
+    _bondedDevicesMap.clear();
+    final bondedDevices = await _flutterBluetoothSerial.getBondedDevices();
+    final bondedSensors = bondedDevices
+        .where((device) => device.name?.startsWith(SENSOR_NAME) ?? false)
+        .toList();
+    bondedSensors.forEach((sensor) {
+      _bondedDevicesMap[sensor.address] = sensor;
+    });
+  }
+
+  /// 기기 연결 시도
+  /// [TRY_CONNECT_DURATION_SECONDS]초 동안 연결 시도
+  Future<bool> connect(String address) async {
+    // address인지 확인
+    if (!_isAddress(address)) {
+      return false;
+    }
+
+    // 기기가 연결되어 있는지 확인
+    await _findBondedDevices();
+    if (_bondedDevicesMap[address] != null) {
+      final isUnbonded =
+          await _flutterBluetoothSerial.removeDeviceBondWithAddress(address) ??
+              false;
+      if (!isUnbonded) return false;
+    }
+
+    // 기기 탐색 및 이름 확인
+    BluetoothDiscoveryResult? result;
+    await _startDiscovery();
+    Timer timerDiscovering =
+        Timer(Duration(seconds: TRY_CONNECT_DURATION_SECONDS), () {
+      _isDiscovering.value = false;
+    });
+    while (isDiscovering) {
+      result = _discoveredResultsMap[address];
+      if (result != null) {
+        _isDiscovering.value = false;
+        timerDiscovering.cancel();
+        if (!(result.device.name?.startsWith(SENSOR_NAME) ?? false)) {
+          return false;
+        }
+      }
+      await Future.delayed(Duration(seconds: TRY_CONNECT_INTERVAL_SECONDS));
+    }
+    if (result == null) return false;
+
+    // 연결 시도
+    BluetoothConnection? connection;
+    bool isConnecting = true;
+    Timer timerConnecting =
+        Timer(Duration(seconds: TRY_CONNECT_DURATION_SECONDS ~/ 2), () {
+      isConnecting = false;
+    });
+    while (isConnecting) {
+      connection = await _connect(address);
+      if (connection != null) {
+        isConnecting = false;
+        timerConnecting.cancel();
+      }
+    }
+    if (connection == null) return false;
+
+    connection.input!.listen((rawData) {
+      _processingData(rawData);
+    });
+    // 연결 결과 정리
+    _address.value = address;
+    _name.value = result.device.name!;
+    _connection.value = connection;
+
+    log("connected");
+    return true;
+  }
 
   /// 기기 연결
-  Future<void> connect(String address) async {
-    BluetoothDevice? device;
+  Future<BluetoothConnection?> _connect(String address) async {
+    try {
+      final connection = await BluetoothConnection.toAddress(address);
+      final isConnected = connection.isConnected;
+      if (!isConnected) return null;
 
-    await disconnect();
-    await cancelDiscovery();
-    _isDiscovering.value = true;
-    _flutterBluetoothSerial.startDiscovery().listen((result) async {
-      if (result.device.address == address) {
-        device = result.device;
-        cancelDiscovery();
-      }
-    }, onDone: (() async {
-      _isDiscovering.value = false;
-
-      log('found) ${device != null}');
-      if (device == null) return;
-
-      // 우리 로직에서는 bonding이 필요 없음
-      // bool isBonded = device!.isBonded || await _bonding(address);
-      // log('bonded) $isBonded');
-      // if (!isBonded) return;
-
-      _connection.value = await _connect(address);
-      log('connected) ${_connection.value!.isConnected}');
-
-      await _receive(_connection.value!,
-          (data) => log('input) ${device!.name} ${data.join()}'));
-
-      await _send(_connection.value!, "HI");
-      log('output) ${device!.name}');
-    }));
-  }
-
-  // 우리 로직에서는 bonding이 필요 없음
-  Future<bool> _bonding(String address) async {
-    return await _flutterBluetoothSerial.bondDeviceAtAddress(address) ?? true;
-  }
-
-  Future<BluetoothConnection> _connect(String address) async {
-    return await BluetoothConnection.toAddress(address);
-  }
-
-  Future<void> _send(BluetoothConnection connection,
-      String message) async {
-    connection.output.add(Uint8List.fromList(utf8.encode(message + '\r\n')));
-    await connection.output.allSent;
-    return;
-  }
-
-  Future<void> _receive(
-      BluetoothConnection connection, WorkerCallback callback) async {
-    _rawData.bindStream(connection.input!);
-    _dataWorker?.dispose();
-    _dataWorker = ever(_rawData, callback);
-  }
-
-  Future<void> disconnect() async {
-    if (_sensor.value?.isConnected ?? false) {
-      await _connection.value!.finish();
-      _sensor.value = null;
+      return connection;
+    } catch (error) {
+      printError(info: error.toString());
+      return null;
     }
   }
+
+  bool _isAddress(String address) {
+    final units = address.split(":");
+    return units.length == 6 &&
+        units.every((unit) => unit.length == 2 && unit.isNumericOnly);
+  }
+
+  void _processingData(Uint8List rawData) {}
 
   @override
   void onClose() {
-    // TODO: implement onClose
     _connection.value?.dispose();
     super.onClose();
   }

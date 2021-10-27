@@ -1,0 +1,1 @@
+const PAIRING_PIN = '0216';
