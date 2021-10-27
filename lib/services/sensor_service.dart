@@ -13,6 +13,7 @@ const SENSOR_NAME = "TUTM";
 const DISCOVERY_DURATION_SECONDS = 10;
 const TRY_CONNECT_DURATION_SECONDS = 5;
 const TRY_CONNECT_INTERVAL_SECONDS = 1;
+const MAX_CONNECT_RETRY_COUNT = 5;
 
 /// [_bluetoothState] 블루투스 상태, [isEnable] 블루투스 사용 가능 여부, [_isDiscovering] 스캔 중 여부,
 /// [_address] 연결된 센서 주소, [_connection] 센서 연결 정보
@@ -35,6 +36,7 @@ class SensorService extends GetxService {
 
   // 데이터 관련
   final RxList<Uint8List> _rawData = <Uint8List>[].obs;
+
   bool get isEnabled => _bluetoothState.value == BluetoothState.STATE_ON;
 
   bool get isDiscovering => _isDiscovering.value;
@@ -141,66 +143,44 @@ class SensorService extends GetxService {
   /// 기기 연결 시도
   /// [TRY_CONNECT_DURATION_SECONDS]초 동안 연결 시도
   Future<bool> connect(String address) async {
-    // address인지 확인
-    if (!_isAddress(address)) {
+    try {
+      // address인지 확인
+      if (!_isAddress(address)) {
+        return false;
+      }
+
+      // 기기가 연결되어 있는지 확인
+      if (await _isBonded(address))
+        await _flutterBluetoothSerial.removeDeviceBondWithAddress(address);
+
+      // 기기 탐색
+      final result =
+          await _findDeviceByAddressWithRetry(address, MAX_CONNECT_RETRY_COUNT);
+      if (result == null) return false;
+
+      // 투툼 센서가 맞는지 확인
+      if (!_isSensor(result)) return false;
+
+      // 연결 시도
+      final connection =
+          await _connectionWithRetry(address, MAX_CONNECT_RETRY_COUNT);
+      if (connection == null) return false;
+
+      // 연결 결과 정리
+      _address.value = address;
+      _name.value = result.device.name!;
+      _connection.value = connection;
+
+      connection.input!.listen((rawData) {
+        _processingData(rawData);
+      });
+
+      log("connected");
+      return true;
+    } catch (error) {
+      print(error);
       return false;
     }
-
-    // 기기가 연결되어 있는지 확인
-    await _findBondedDevices();
-    if (_bondedDevicesMap[address] != null) {
-      final isUnbonded =
-          await _flutterBluetoothSerial.removeDeviceBondWithAddress(address) ??
-              false;
-      if (!isUnbonded) return false;
-    }
-
-    // 기기 탐색 및 이름 확인
-    BluetoothDiscoveryResult? result;
-    await _startDiscovery();
-    Timer timerDiscovering =
-        Timer(Duration(seconds: TRY_CONNECT_DURATION_SECONDS), () {
-      _isDiscovering.value = false;
-    });
-    while (isDiscovering) {
-      result = _discoveredResultsMap[address];
-      if (result != null) {
-        _isDiscovering.value = false;
-        timerDiscovering.cancel();
-        if (!(result.device.name?.startsWith(SENSOR_NAME) ?? false)) {
-          return false;
-        }
-      }
-      await Future.delayed(Duration(seconds: TRY_CONNECT_INTERVAL_SECONDS));
-    }
-    if (result == null) return false;
-
-    // 연결 시도
-    BluetoothConnection? connection;
-    bool isConnecting = true;
-    Timer timerConnecting =
-        Timer(Duration(seconds: TRY_CONNECT_DURATION_SECONDS ~/ 2), () {
-      isConnecting = false;
-    });
-    while (isConnecting) {
-      connection = await _connect(address);
-      if (connection != null) {
-        isConnecting = false;
-        timerConnecting.cancel();
-      }
-    }
-    if (connection == null) return false;
-
-    connection.input!.listen((rawData) {
-      _processingData(rawData);
-    });
-    // 연결 결과 정리
-    _address.value = address;
-    _name.value = result.device.name!;
-    _connection.value = connection;
-
-    log("connected");
-    return true;
   }
 
   /// 기기 연결
@@ -217,12 +197,56 @@ class SensorService extends GetxService {
     }
   }
 
+  /// address 형식이 맞는지 확인
   bool _isAddress(String address) {
-    final units = address.split(":");
-    return units.length == 6 &&
-        units.every((unit) => unit.length == 2 && unit.isNumericOnly);
+    return RegExp(r'^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$').hasMatch(address);
   }
 
+  /// 해당 address가 연결되어있는지 확인
+  Future<bool> _isBonded(String address) async {
+    await _findBondedDevices();
+    return _bondedDevicesMap[address] != null;
+  }
+
+  Future<BluetoothDiscoveryResult?> _findDeviceByAddressWithRetry(
+      String address, int maxRetryCount) async {
+    BluetoothDiscoveryResult? result;
+
+    await _startDiscovery();
+
+    for (int i = 0; i < maxRetryCount; i++) {
+      result = _discoveredResultsMap[address];
+      if (result != null) {
+        await _stopDiscovery();
+        break;
+      }
+      await Future.delayed(Duration(seconds: TRY_CONNECT_INTERVAL_SECONDS));
+    }
+
+    return result;
+  }
+
+  /// 센서가 맞는지 확인
+  bool _isSensor(BluetoothDiscoveryResult result) {
+    return (result.device.name?.startsWith(SENSOR_NAME) ?? false);
+  }
+
+  /// 재시도를 포함한 연결 시도
+  Future<BluetoothConnection?> _connectionWithRetry(
+      String address, int maxRetryCount) async {
+    BluetoothConnection? connection;
+
+    for (int i = 0; i < maxRetryCount; i++) {
+      connection = await _connect(address);
+      if (connection != null) {
+        break;
+      }
+    }
+
+    return connection;
+  }
+
+  /// 데이터 전처리
   void _processingData(Uint8List rawData) {}
 
   @override
