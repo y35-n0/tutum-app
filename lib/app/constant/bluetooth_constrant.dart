@@ -1,1 +1,17 @@
 const PAIRING_PIN = '0216';
+
+const COUNT_START = 0;
+const SIGN_START = [0xFF, 0xFE];
+const LENGTH_START = 1;
+
+const COUNT_TEMPERATURE = 2378;
+const LENGTH_TEMPERATURE = 4;
+
+const COUNT_CAPACITY = 2380;
+const LENGTH_CAPACITY = 2;
+
+const COUNT_OXYGEN = 2382;
+const LENGTH_OXYGEN = 4;
+
+const LENGTH_EACH_IMU = 2;
+const LENGTH_IMU = LENGTH_EACH_IMU * 6;

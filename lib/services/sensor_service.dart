@@ -7,17 +7,18 @@ import 'dart:developer';
 
 import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
 import 'package:tutum_app/models/device.dart';
+import 'package:tutum_app/models/sensor_data.dart';
 
 // FIXME: TUTM => TUTUM
 const SENSOR_NAME = "TUTM";
 const DISCOVERY_DURATION_SECONDS = 10;
-const TRY_CONNECT_DURATION_SECONDS = 5;
+const TRY_CONNECT_DURATION_SECONDS = 1;
 const TRY_CONNECT_INTERVAL_SECONDS = 1;
 const MAX_CONNECT_RETRY_COUNT = 5;
 
 /// [_bluetoothState] 블루투스 상태, [isEnable] 블루투스 사용 가능 여부, [_isDiscovering] 스캔 중 여부,
 /// [_address] 연결된 센서 주소, [_connection] 센서 연결 정보
-/// [_rawData] Raw Data, [_dataWorker] raw data를 처리할 워커
+/// [_rawData] Raw Data
 
 class SensorService extends GetxService {
   static SensorService get to => Get.find();
@@ -35,7 +36,9 @@ class SensorService extends GetxService {
   final Rxn<BluetoothConnection> _connection = Rxn<BluetoothConnection>();
 
   // 데이터 관련
-  final RxList<Uint8List> _rawData = <Uint8List>[].obs;
+  final List<int> _rawData = <int>[];
+  bool _start = false;
+  int _count = 0;
 
   bool get isEnabled => _bluetoothState.value == BluetoothState.STATE_ON;
 
@@ -246,8 +249,67 @@ class SensorService extends GetxService {
     return connection;
   }
 
-  /// 데이터 전처리
-  void _processingData(Uint8List rawData) {}
+  /// raw 데이터 처리
+  void _processingData(Uint8List rawData) {
+    _rawData.addAll(rawData);
+    bool running = true;
+    while (running) {
+      switch (_count) {
+        case COUNT_START:
+          // 시작 지점 찾기
+          // FIXME: Sync를 맞춰야 함.
+          if (!_start) {
+            int index = 0;
+            do {
+              index = _rawData.indexOf(SIGN_START[1], index + 1);
+            } while (index > -1 && _rawData[index - 1] != SIGN_START[0]);
+            if (_rawData.length >= LENGTH_START && index > -1) {
+              _rawData.removeRange(0, index + 1);
+              _count++;
+              _start = true;
+            } else {
+              running = false;
+            }
+          }
+          _count++;
+          log("start ${DateTime.now()} ${_rawData.length}");
+          break;
+        case COUNT_TEMPERATURE:
+          _count++;
+          break;
+        case COUNT_CAPACITY:
+          _count++;
+          break;
+        case COUNT_OXYGEN:
+          _count = 0;
+          break;
+        default: // imu
+          if (_rawData.length >= LENGTH_IMU) {
+            final imu = Imu(
+              accX: complement((_rawData[0] << 8) | _rawData[1]) * 8 / 32768,
+              accY: complement((_rawData[2] << 8) | _rawData[3]) * 8 / 32768,
+              accZ: complement((_rawData[4] << 8) | _rawData[5]) * 8 / 32768,
+              gyroX: complement((_rawData[6] << 8) | _rawData[7]) * 500 / 32768,
+              gyroY: complement((_rawData[8] << 8) | _rawData[9]) * 500 / 32768,
+              gyroZ:
+                  complement((_rawData[10] << 8) | _rawData[11]) * 500 / 32768,
+            );
+            _rawData.removeRange(0, LENGTH_IMU);
+            _count++;
+            print(
+                '$_count ${imu.accX} ${imu.accY} ${imu.accZ} ${imu.gyroX} ${imu.gyroY} ${imu.gyroZ}');
+          } else {
+            running = false;
+          }
+      }
+    }
+  }
+
+  /// 2의 보수
+  num complement(value) {
+    if ((value & (1 << (16 - 1))) != 0) value = value - (1 << 16);
+    return value;
+  }
 
   @override
   void onClose() {
