@@ -1,19 +1,22 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:developer';
 
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:get/get.dart';
-import 'dart:developer';
 
 import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
 import 'package:tutum_app/app/util/api.dart';
 import 'package:tutum_app/models/device.dart';
 import 'package:tutum_app/models/sensor_data.dart';
+import 'package:tutum_app/models/sensors/capacity.dart';
 import 'package:tutum_app/models/sensors/imu.dart';
+import 'package:tutum_app/models/sensors/oxygen.dart';
+import 'package:tutum_app/models/sensors/temperature.dart';
 
 // FIXME: TUTM => TUTUM
 const SENSOR_NAME = "TUTM";
-const DISCOVERY_DURATION_SECONDS = 10;
+const DISCOVERY_DURATION_SECONDS = 5;
 const TRY_CONNECT_DURATION_SECONDS = 1;
 const TRY_CONNECT_INTERVAL_SECONDS = 1;
 const MAX_CONNECT_RETRY_COUNT = 5;
@@ -92,6 +95,7 @@ class SensorService extends GetxService {
     initWorkers();
   }
 
+  /// 데이터 처리용 worker 등록
   void initWorkers() {
     _rawDataWorker = interval(_rawData, (rawData) {
       rawData as List<int>;
@@ -281,9 +285,11 @@ class SensorService extends GetxService {
   }
 
   /// rawData worker
-  // TODO: 다른 데이터에 대한 정보를 맞춰야 함
+  // TODO: 실행 TEST
+  // TODO: 간략하게 만들기
   void _processing(List<int> rawData) {
     _isProcessing = true;
+    SENSOR_TYPE? type;
     while (_isProcessing) {
       switch (_count) {
         case COUNT_START:
@@ -303,30 +309,62 @@ class SensorService extends GetxService {
           } else {
             _isProcessing = false;
           }
-          break;
+          continue;
 
         case COUNT_TEMPERATURE:
+          type = SENSOR_TYPE.TEMPERATURE;
           _count++;
+          if (rawData.length >= DATA_LENGTH[type]!) {
+            final data =
+                Temperature.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
+
+            _sensorData.value.add(data);
+            _sensorData.refresh();
+            rawData.removeRange(0, DATA_LENGTH[type]!);
+            // print("${data.temperature}");
+          } else {
+            _isProcessing = false;
+          }
           break;
         case COUNT_CAPACITY:
+          type = SENSOR_TYPE.CAPACITY;
           _count++;
+          if (rawData.length >= DATA_LENGTH[type]!) {
+            final data =
+                Capacity.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
+
+            _sensorData.value.add(data);
+            _sensorData.refresh();
+            rawData.removeRange(0, DATA_LENGTH[type]!);
+            // print("${data.capacity}");
+          } else {
+            _isProcessing = false;
+          }
           break;
         case COUNT_OXYGEN:
+          type = SENSOR_TYPE.OXYGEN;
           _count = 0;
+          if (rawData.length >= DATA_LENGTH[type]!) {
+            final data =
+                Oxygen.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
+
+            _sensorData.value.add(data);
+            _sensorData.refresh();
+            rawData.removeRange(0, DATA_LENGTH[type]!);
+            // print("${data.oxygen}");
+          } else {
+            _isProcessing = false;
+          }
           break;
-        case COUNT_IMU_START:
-          _sensorData.value.setImuTimestamp();
-          _sensorData.refresh();
-          continue imu;
-
-        imu:
         default: // imu
-          if (rawData.length >= LENGTH_IMU) {
-            final imu = Imu.fromIntList(rawData.sublist(0, LENGTH_IMU));
+          _count++;
+          type = SENSOR_TYPE.IMU;
+          if (rawData.length >= DATA_LENGTH[type]!) {
+            final data =
+                Imu.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
 
-            rawData.removeRange(0, LENGTH_IMU);
-            _count++;
-            _sensorData.value.addImu(imu);
+            rawData.removeRange(0, DATA_LENGTH[type]!);
+            _sensorData.value.add(data);
             _sensorData.refresh();
             // print(
             //     "${imu.accX} ${imu.accY} ${imu.accZ} ${imu.gyroX} ${imu.gyroY} ${imu.gyroZ} ");
@@ -351,7 +389,6 @@ class SensorService extends GetxService {
   void _sending(SensorData sensorData) {
     sensorDataApi(sensorData);
     sensorData.clear();
-    sensorData.setImuTimestamp();
   }
 
   @override

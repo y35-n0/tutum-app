@@ -28,15 +28,6 @@ class Imu {
     this.gyroZ = Util.complement((list[10] << 8) | list[11]) * 500 / 32768;
   }
 
-  Map<String, dynamic> toJson() => {
-    "accX": this.accX,
-    "accY": this.accY,
-    "accZ": this.accZ,
-    "gyroX": this.gyroX,
-    "gyroY": this.gyroY,
-    "gyroZ": this.gyroZ,
-  };
-
   List<num> toNumList() =>
       [this.accX, this.accY, this.accZ, this.gyroX, this.gyroY, this.gyroZ];
 }
