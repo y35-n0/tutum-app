@@ -1,0 +1,28 @@
+import 'dart:convert';
+
+import 'package:tutum_app/app/constant/service_constant.dart';
+import 'package:tutum_app/models/sensor_data.dart';
+import 'package:http/http.dart' as http;
+import 'package:tutum_app/services/auth_service.dart';
+
+
+
+/// call sensor data api
+void sensorDataApi(SensorData sensorData) async {
+  var client = http.Client();
+  try {
+    // TODO: API TEST
+    var response = await client
+        .post(Uri.http(TutumApiServer.URL_BASE, "data/insert/all"), body: {
+      "id": AuthService.to.loggedInUser.id.toString(),
+      "sensorData": sensorData.json,
+    });
+    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    // print(decodedResponse.toString());
+    // print(sensorData.json);
+  } catch (error) {
+    print(error);
+  }
+}
+
+/// call sensor data api

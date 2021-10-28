@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'dart:developer';
 
 import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
+import 'package:tutum_app/app/util/api.dart';
 import 'package:tutum_app/models/device.dart';
 import 'package:tutum_app/models/sensor_data.dart';
 import 'package:tutum_app/models/sensors/imu.dart';
@@ -327,6 +328,8 @@ class SensorService extends GetxService {
             _count++;
             _sensorData.value.addImu(imu);
             _sensorData.refresh();
+            // print(
+            //     "${imu.accX} ${imu.accY} ${imu.accZ} ${imu.gyroX} ${imu.gyroY} ${imu.gyroZ} ");
           } else {
             _isProcessing = false;
           }
@@ -346,14 +349,9 @@ class SensorService extends GetxService {
 
   /// sensorData worker
   void _sending(SensorData sensorData) {
-    _sendApi(sensorData);
+    sensorDataApi(sensorData);
     sensorData.clear();
     sensorData.setImuTimestamp();
-  }
-
-  /// call sensor data api
-  void _sendApi(SensorData sensorData) async {
-    sensorData.toListMap().toString();
   }
 
   @override

@@ -1,4 +1,4 @@
-import 'package:tutum_app/models/sensors/sensor_util.dart';
+import 'package:tutum_app/app/util/util.dart';
 
 class Imu {
   Imu({
@@ -20,12 +20,12 @@ class Imu {
   List<num> get value => toNumList();
 
   Imu.fromIntList(List<int> list) {
-    this.accX = SensorUtil.complement((list[0] << 8) | list[1]) * 8 / 32768;
-    this.accY = SensorUtil.complement((list[2] << 8) | list[3]) * 8 / 32768;
-    this.accZ = SensorUtil.complement((list[4] << 8) | list[5]) * 8 / 32768;
-    this.gyroX = SensorUtil.complement((list[6] << 8) | list[7]) * 500 / 32768;
-    this.gyroY = SensorUtil.complement((list[8] << 8) | list[9]) * 500 / 32768;
-    this.gyroZ = SensorUtil.complement((list[10] << 8) | list[11]) * 500 / 32768;
+    this.accX = Util.complement((list[0] << 8) | list[1]) * 8 / 32768;
+    this.accY = Util.complement((list[2] << 8) | list[3]) * 8 / 32768;
+    this.accZ = Util.complement((list[4] << 8) | list[5]) * 8 / 32768;
+    this.gyroX = Util.complement((list[6] << 8) | list[7]) * 500 / 32768;
+    this.gyroY = Util.complement((list[8] << 8) | list[9]) * 500 / 32768;
+    this.gyroZ = Util.complement((list[10] << 8) | list[11]) * 500 / 32768;
   }
 
   Map<String, dynamic> toJson() => {

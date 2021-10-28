@@ -5,5 +5,6 @@ abstract class ServiceConstants {
 }
 
 abstract class TutumApiServer {
-  static const URL_BASE = '13.125.124.58:8002';
+  static const URL_BASE = '13.125.124.58:8000';
 }
+

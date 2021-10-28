@@ -20,12 +20,10 @@ dependencies:
   provider: 5.0.0
   shared_preferences: 2.0.6
   flutter_secure_storage: 4.2.1
+  http: 0.13.3
 
   system_settings: 2.0.0
   permission_handler: 8.1.2
-
-  geolocator: 7.2.0+1
-
 
   flutter_blue: 0.8.0
   flutter_bluetooth_serial: 0.4.0

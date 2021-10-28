@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:tutum_app/models/sensors/imu.dart';
+import 'package:tutum_app/app/util/util.dart';
 
 class SensorData {
   List<List<num>> _imuList = [];
@@ -26,7 +27,7 @@ class SensorData {
     if (_imuTimestamp != null)
       list.add({
         "type": "imu",
-        "timestamp": _imuTimestamp.toString(),
+        "timestamp": Util.formatter.format(_imuTimestamp!),
         "value": _imuList,
       });
     log("$_imuTimestamp ${_imuList.length}");
