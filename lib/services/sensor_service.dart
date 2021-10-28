@@ -8,6 +8,7 @@ import 'dart:developer';
 import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
 import 'package:tutum_app/models/device.dart';
 import 'package:tutum_app/models/sensor_data.dart';
+import 'package:tutum_app/models/sensors/imu.dart';
 
 // FIXME: TUTM => TUTUM
 const SENSOR_NAME = "TUTM";
@@ -15,10 +16,12 @@ const DISCOVERY_DURATION_SECONDS = 10;
 const TRY_CONNECT_DURATION_SECONDS = 1;
 const TRY_CONNECT_INTERVAL_SECONDS = 1;
 const MAX_CONNECT_RETRY_COUNT = 5;
+const PROCESSING_DATA_INTERVAL = Duration(milliseconds: 200);
+const SENDING_DATA_INTERVAL = Duration(seconds: 1);
 
 /// [_bluetoothState] 블루투스 상태, [isEnable] 블루투스 사용 가능 여부, [_isDiscovering] 스캔 중 여부,
 /// [_address] 연결된 센서 주소, [_connection] 센서 연결 정보
-/// [_rawData] Raw Data, [_worker] Raw data 처리 워커
+/// [_rawData] Raw Data, [_rawDataWorker] Raw data 처리 워커
 
 class SensorService extends GetxService {
   static SensorService get to => Get.find();
@@ -37,8 +40,15 @@ class SensorService extends GetxService {
 
   // 데이터 관련
   final RxList<int> _rawData = <int>[].obs;
-  late Worker _worker;
+  late Worker _rawDataWorker;
+  late Worker _sensorDataWorker;
+
+  bool _isProcessing = true;
+
   int _count = 0;
+
+  // 파싱된 데이터
+  final Rx<SensorData> _sensorData = SensorData().obs;
 
   bool get isEnabled => _bluetoothState.value == BluetoothState.STATE_ON;
 
@@ -78,10 +88,19 @@ class SensorService extends GetxService {
       },
     );
 
-    _worker = interval(_rawData, (rawData) {
+    initWorkers();
+  }
+
+  void initWorkers() {
+    _rawDataWorker = interval(_rawData, (rawData) {
       rawData as List<int>;
       _processing(rawData);
-    }, time: Duration(milliseconds: 500));
+    }, time: PROCESSING_DATA_INTERVAL);
+
+    _sensorDataWorker = interval(_sensorData, (sensorData) {
+      sensorData as SensorData;
+      _sending(sensorData);
+    }, time: SENDING_DATA_INTERVAL);
   }
 
   /// 주변 기기 탐색 시작
@@ -263,8 +282,8 @@ class SensorService extends GetxService {
   /// rawData worker
   // TODO: 다른 데이터에 대한 정보를 맞춰야 함
   void _processing(List<int> rawData) {
-    bool processing = true;
-    while (processing) {
+    _isProcessing = true;
+    while (_isProcessing) {
       switch (_count) {
         case COUNT_START:
           // 시작 지점 찾기
@@ -277,12 +296,14 @@ class SensorService extends GetxService {
                   rawData.sublist(index - (SIGN_START.length - 1), index + 1)));
 
           if (rawData.length >= LENGTH_START && index > -1) {
-            rawData.removeRange(0, index + 1);
+            log("START");
             _count++;
+            rawData.removeRange(0, index + 1);
           } else {
-            processing = false;
+            _isProcessing = false;
           }
           break;
+
         case COUNT_TEMPERATURE:
           _count++;
           break;
@@ -292,15 +313,24 @@ class SensorService extends GetxService {
         case COUNT_OXYGEN:
           _count = 0;
           break;
+        case COUNT_IMU_START:
+          _sensorData.value.setImuTimestamp();
+          _sensorData.refresh();
+          continue imu;
+
+        imu:
         default: // imu
           if (rawData.length >= LENGTH_IMU) {
             final imu = Imu.fromIntList(rawData.sublist(0, LENGTH_IMU));
 
             rawData.removeRange(0, LENGTH_IMU);
             _count++;
+            _sensorData.value.addImu(imu);
+            _sensorData.refresh();
           } else {
-            processing = false;
+            _isProcessing = false;
           }
+          break;
       }
     }
   }
@@ -314,10 +344,23 @@ class SensorService extends GetxService {
     return true;
   }
 
+  /// sensorData worker
+  void _sending(SensorData sensorData) {
+    _sendApi(sensorData);
+    sensorData.clear();
+    sensorData.setImuTimestamp();
+  }
+
+  /// call sensor data api
+  void _sendApi(SensorData sensorData) async {
+    sensorData.toListMap().toString();
+  }
+
   @override
   void onClose() {
     _connection.value?.dispose();
-    _worker.dispose();
+    _rawDataWorker.dispose();
+    _sensorDataWorker.dispose();
     super.onClose();
   }
 }
