@@ -1,7 +1,7 @@
 const PAIRING_PIN = '0216';
 
 const COUNT_START = 0;
-const SIGN_START = [0xFF, 0xFE];
+const SIGN_START = [0xFF, 0xFF, 0xFF, 0xFE];
 const LENGTH_START = 1;
 
 const COUNT_TEMPERATURE = 2378;

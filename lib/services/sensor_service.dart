@@ -18,7 +18,7 @@ const MAX_CONNECT_RETRY_COUNT = 5;
 
 /// [_bluetoothState] 블루투스 상태, [isEnable] 블루투스 사용 가능 여부, [_isDiscovering] 스캔 중 여부,
 /// [_address] 연결된 센서 주소, [_connection] 센서 연결 정보
-/// [_rawData] Raw Data
+/// [_rawData] Raw Data, [_worker] Raw data 처리 워커
 
 class SensorService extends GetxService {
   static SensorService get to => Get.find();
@@ -36,8 +36,8 @@ class SensorService extends GetxService {
   final Rxn<BluetoothConnection> _connection = Rxn<BluetoothConnection>();
 
   // 데이터 관련
-  final List<int> _rawData = <int>[];
-  bool _start = false;
+  final RxList<int> _rawData = <int>[].obs;
+  late Worker _worker;
   int _count = 0;
 
   bool get isEnabled => _bluetoothState.value == BluetoothState.STATE_ON;
@@ -77,6 +77,11 @@ class SensorService extends GetxService {
         }
       },
     );
+
+    _worker = interval(_rawData, (rawData) {
+      rawData as List<int>;
+      _processing(rawData);
+    }, time: Duration(milliseconds: 500));
   }
 
   /// 주변 기기 탐색 시작
@@ -175,7 +180,7 @@ class SensorService extends GetxService {
       _connection.value = connection;
 
       connection.input!.listen((rawData) {
-        _processingData(rawData);
+        _gettingRawData(rawData);
       });
 
       log("connected");
@@ -183,20 +188,6 @@ class SensorService extends GetxService {
     } catch (error) {
       print(error);
       return false;
-    }
-  }
-
-  /// 기기 연결
-  Future<BluetoothConnection?> _connect(String address) async {
-    try {
-      final connection = await BluetoothConnection.toAddress(address);
-      final isConnected = connection.isConnected;
-      if (!isConnected) return null;
-
-      return connection;
-    } catch (error) {
-      printError(info: error.toString());
-      return null;
     }
   }
 
@@ -211,6 +202,7 @@ class SensorService extends GetxService {
     return _bondedDevicesMap[address] != null;
   }
 
+  /// [address]를 [TRY_CONNECT_INTERVAL_SECONDS]초 간격으로 [maxRetryCount]횟수 만큼 탐색 시도
   Future<BluetoothDiscoveryResult?> _findDeviceByAddressWithRetry(
       String address, int maxRetryCount) async {
     BluetoothDiscoveryResult? result;
@@ -249,30 +241,47 @@ class SensorService extends GetxService {
     return connection;
   }
 
+  /// 기기 연결
+  Future<BluetoothConnection?> _connect(String address) async {
+    try {
+      final connection = await BluetoothConnection.toAddress(address);
+      final isConnected = connection.isConnected;
+      if (!isConnected) return null;
+
+      return connection;
+    } catch (error) {
+      printError(info: error.toString());
+      return null;
+    }
+  }
+
   /// raw 데이터 처리
-  void _processingData(Uint8List rawData) {
+  void _gettingRawData(Uint8List rawData) {
     _rawData.addAll(rawData);
-    bool running = true;
-    while (running) {
+  }
+
+  /// rawData worker
+  // TODO: 다른 데이터에 대한 정보를 맞춰야 함
+  void _processing(List<int> rawData) {
+    bool processing = true;
+    while (processing) {
       switch (_count) {
         case COUNT_START:
           // 시작 지점 찾기
-          // FIXME: Sync를 맞춰야 함.
-          if (!_start) {
-            int index = 0;
-            do {
-              index = _rawData.indexOf(SIGN_START[1], index + 1);
-            } while (index > -1 && _rawData[index - 1] != SIGN_START[0]);
-            if (_rawData.length >= LENGTH_START && index > -1) {
-              _rawData.removeRange(0, index + 1);
-              _count++;
-              _start = true;
-            } else {
-              running = false;
-            }
+          int index = SIGN_START.length - 2;
+          do {
+            index =
+                rawData.indexOf(SIGN_START[SIGN_START.length - 1], index + 1);
+          } while (index > -1 &&
+              !_isSignStart(
+                  rawData.sublist(index - (SIGN_START.length - 1), index + 1)));
+
+          if (rawData.length >= LENGTH_START && index > -1) {
+            rawData.removeRange(0, index + 1);
+            _count++;
+          } else {
+            processing = false;
           }
-          _count++;
-          log("start ${DateTime.now()} ${_rawData.length}");
           break;
         case COUNT_TEMPERATURE:
           _count++;
@@ -284,36 +293,31 @@ class SensorService extends GetxService {
           _count = 0;
           break;
         default: // imu
-          if (_rawData.length >= LENGTH_IMU) {
-            final imu = Imu(
-              accX: complement((_rawData[0] << 8) | _rawData[1]) * 8 / 32768,
-              accY: complement((_rawData[2] << 8) | _rawData[3]) * 8 / 32768,
-              accZ: complement((_rawData[4] << 8) | _rawData[5]) * 8 / 32768,
-              gyroX: complement((_rawData[6] << 8) | _rawData[7]) * 500 / 32768,
-              gyroY: complement((_rawData[8] << 8) | _rawData[9]) * 500 / 32768,
-              gyroZ:
-                  complement((_rawData[10] << 8) | _rawData[11]) * 500 / 32768,
-            );
-            _rawData.removeRange(0, LENGTH_IMU);
+          if (rawData.length >= LENGTH_IMU) {
+            final imu = Imu.fromIntList(rawData.sublist(0, LENGTH_IMU));
+
+            rawData.removeRange(0, LENGTH_IMU);
             _count++;
-            print(
-                '$_count ${imu.accX} ${imu.accY} ${imu.accZ} ${imu.gyroX} ${imu.gyroY} ${imu.gyroZ}');
           } else {
-            running = false;
+            processing = false;
           }
       }
     }
   }
 
-  /// 2의 보수
-  num complement(value) {
-    if ((value & (1 << (16 - 1))) != 0) value = value - (1 << 16);
-    return value;
+  /// sign start인지 확인
+  bool _isSignStart(List<int> list) {
+    if (list.length < SIGN_START.length) return false;
+    for (int i = 0; i < SIGN_START.length; i++) {
+      if (list[i] != SIGN_START[i]) return false;
+    }
+    return true;
   }
 
   @override
   void onClose() {
     _connection.value?.dispose();
+    _worker.dispose();
     super.onClose();
   }
 }
