@@ -1,6 +1,7 @@
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
+import 'package:tutum_app/app/util/check_passed.dart';
 import 'package:tutum_app/models/beacon/rssi.dart';
 import 'package:tutum_app/models/beacon/beacon.dart';
 import 'package:tutum_app/models/device.dart';
@@ -22,6 +23,8 @@ class BeaconService extends GetxService {
 
   // 데이터 저장
   final RxMap<String, Beacon> _beacons = <String, Beacon>{}.obs;
+  final CheckPassed _checkPassed = CheckPassed();
+
   final List<Worker> workers = [];
 
   BluetoothState get bluetoothState => _bluetoothState.value;
@@ -43,13 +46,17 @@ class BeaconService extends GetxService {
     workers.addAll([
       ever(_scanResult, (result) {
         result as ScanResult;
+        // 실행 중이 아니면 종료
         if (!isRunning) return;
+        // Tutum 비콘이 아니면 종료
         if (!result.device.name.startsWith(DEVICE_NAME)) return;
 
+        // rssi 데이터 추가
         if (!_beacons.containsKey(result.device.name)) {
           _beacons[result.device.name] = Beacon.fromScanResult(result);
         }
         _beacons[result.device.name]!.add(Rssi(result.rssi));
+
 
         _beacons.refresh();
         // TODO: RSSI를 이용한 문 통과 확인 로직
@@ -95,7 +102,8 @@ class BeaconService extends GetxService {
   /// 종료할 때 worker들 모두 종료
   @override
   void onClose() {
-    super.onClose();
+    stop();
     workers.forEach((worker) => worker.dispose());
+    super.onClose();
   }
 }

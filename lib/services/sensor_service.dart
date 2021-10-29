@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:developer';
 
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart' as FBS;
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:get/get.dart';
 
 import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
-import 'package:tutum_app/app/util/api.dart';
+import 'package:tutum_app/app/util/server_api.dart';
 import 'package:tutum_app/models/device.dart';
 import 'package:tutum_app/models/sensor_data.dart';
 import 'package:tutum_app/models/sensors/capacity.dart';
@@ -31,16 +31,16 @@ class SensorService extends GetxService {
   static SensorService get to => Get.find();
 
   // 블루투스 관련
-  final FBS.FlutterBluetoothSerial _flutterBluetoothSerial =
-      FBS.FlutterBluetoothSerial.instance;
-  final Rx<FBS.BluetoothState> _bluetoothState = FBS.BluetoothState.UNKNOWN.obs;
+  final FlutterBluetoothSerial _flutterBluetoothSerial =
+      FlutterBluetoothSerial.instance;
+  final Rx<BluetoothState> _bluetoothState = BluetoothState.UNKNOWN.obs;
 
   final Rx<bool> _isDiscovering = false.obs;
 
   // 센서 관련
   final Rx<String> _address = "".obs;
   final Rx<String> _name = "".obs;
-  final Rxn<FBS.BluetoothConnection> _connection = Rxn<FBS.BluetoothConnection>();
+  final Rxn<BluetoothConnection> _connection = Rxn<BluetoothConnection>();
 
   // 데이터 관련
   final RxList<int> _rawData = <int>[].obs;
@@ -54,7 +54,7 @@ class SensorService extends GetxService {
   // 파싱된 데이터
   final Rx<SensorData> _sensorData = SensorData().obs;
 
-  bool get isEnabled => _bluetoothState.value == FBS.BluetoothState.STATE_ON;
+  bool get isEnabled => _bluetoothState.value == BluetoothState.STATE_ON;
 
   bool get isDiscovering => _isDiscovering.value;
 
@@ -65,10 +65,10 @@ class SensorService extends GetxService {
   bool get sensorIsConnected => _connection.value?.isConnected ?? false;
 
   // 연결된 기기
-  final RxMap<String, FBS.BluetoothDevice> _bondedDevicesMap =
-      Map<String, FBS.BluetoothDevice>().obs;
-  final RxMap<String, FBS.BluetoothDiscoveryResult> _discoveredResultsMap =
-      Map<String, FBS.BluetoothDiscoveryResult>().obs;
+  final RxMap<String, BluetoothDevice> _bondedDevicesMap =
+      Map<String, BluetoothDevice>().obs;
+  final RxMap<String, BluetoothDiscoveryResult> _discoveredResultsMap =
+      Map<String, BluetoothDiscoveryResult>().obs;
 
   List<Device> get devices => getDevices();
 
@@ -83,8 +83,8 @@ class SensorService extends GetxService {
     _bluetoothState.bindStream(_flutterBluetoothSerial.onStateChanged());
 
     _flutterBluetoothSerial.setPairingRequestHandler(
-      (FBS.BluetoothPairingRequest request) {
-        if (request.pairingVariant == FBS.PairingVariant.Pin) {
+      (BluetoothPairingRequest request) {
+        if (request.pairingVariant == PairingVariant.Pin) {
           return Future.value("$PAIRING_PIN");
         } else {
           return Future.value(null);
@@ -165,9 +165,9 @@ class SensorService extends GetxService {
     _bondedDevicesMap.clear();
     final bondedDevices = await _flutterBluetoothSerial.getBondedDevices();
     final bondedSensors = bondedDevices
-        .where((FBS.BluetoothDevice device) => device.name?.startsWith(SENSOR_NAME) ?? false)
+        .where((BluetoothDevice device) => device.name?.startsWith(SENSOR_NAME) ?? false)
         .toList();
-    bondedSensors.forEach((FBS.BluetoothDevice sensor) {
+    bondedSensors.forEach((BluetoothDevice sensor) {
       _bondedDevicesMap[sensor.address] = sensor;
     });
   }
@@ -227,9 +227,9 @@ class SensorService extends GetxService {
   }
 
   /// [address]를 [TRY_CONNECT_INTERVAL_SECONDS]초 간격으로 [maxRetryCount]횟수 만큼 탐색 시도
-  Future<FBS.BluetoothDiscoveryResult?> _findDeviceByAddressWithRetry(
+  Future<BluetoothDiscoveryResult?> _findDeviceByAddressWithRetry(
       String address, int maxRetryCount) async {
-    FBS.BluetoothDiscoveryResult? result;
+    BluetoothDiscoveryResult? result;
 
     await _startDiscovery();
 
@@ -246,14 +246,14 @@ class SensorService extends GetxService {
   }
 
   /// 센서가 맞는지 확인
-  bool _isSensor(FBS.BluetoothDiscoveryResult result) {
+  bool _isSensor(BluetoothDiscoveryResult result) {
     return (result.device.name?.startsWith(SENSOR_NAME) ?? false);
   }
 
   /// 재시도를 포함한 연결 시도
-  Future<FBS.BluetoothConnection?> _connectionWithRetry(
+  Future<BluetoothConnection?> _connectionWithRetry(
       String address, int maxRetryCount) async {
-    FBS.BluetoothConnection? connection;
+    BluetoothConnection? connection;
 
     for (int i = 0; i < maxRetryCount; i++) {
       connection = await _connect(address);
@@ -266,9 +266,9 @@ class SensorService extends GetxService {
   }
 
   /// 기기 연결
-  Future<FBS.BluetoothConnection?> _connect(String address) async {
+  Future<BluetoothConnection?> _connect(String address) async {
     try {
-      final connection = await FBS.BluetoothConnection.toAddress(address);
+      final connection = await BluetoothConnection.toAddress(address);
       final isConnected = connection.isConnected;
       if (!isConnected) return null;
 

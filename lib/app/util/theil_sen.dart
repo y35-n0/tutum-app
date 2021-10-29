@@ -4,29 +4,29 @@ import 'package:trotter/trotter.dart';
 /// Theil-Sen 알고리즘
 /// 2차원 식 추정
 class TheilSen {
-  late List<num> _x;
-  late List<num> _y;
+  TheilSen();
+
   late Map<num, num> _data;
 
-  num? _a;
-  num? _b;
-  num? _c;
+  late num _a;
+  late num _b;
+  late num _c;
 
-  num? get a => _a;
+  num get a => _a;
 
-  num? get b => _b;
+  num get b => _b;
 
-  num? get c => _c;
+  num get c => _c;
 
   Map<num, num> get data => _data;
 
   /// set [_data] from [x], [y]
-  void setDataFromXY(List<num> y, [List<num>? x]) {
+  void calculate(List<num> y, [List<num>? x]) {
     if (x == null) {
       _data = y.asMap();
     } else {
       final length = x.length <= y.length ? x.length : y.length;
-      _data = {for (var i = 0; i < length; i += 1) _x[i]: _y[i]};
+      _data = {for (var i = 0; i < length; i += 1) x[i]: y[i]};
     }
     _calculateA();
     _calculateB();
@@ -38,7 +38,6 @@ class TheilSen {
     combs.items.shuffle(Random(42));
     List<num> list = [];
 
-    int i = 0;
     for (final comb in combs().take(10000)) {
       list.add((comb[2].key * (comb[1].value - comb[0].value) +
               comb[1].key * (comb[0].value - comb[2].value) +
