@@ -47,6 +47,9 @@ class BeaconService extends GetxService {
 
   bool get isRunning => _isRunning.value;
 
+  // for test
+  SensorData get sensorData => _sensorData.value;
+
   @override
   void onInit() {
     _bluetoothState.bindStream(_flutterBlue.state);
@@ -93,7 +96,7 @@ class BeaconService extends GetxService {
 
   /// 각 비콘 별로 지나감 여부를 판별함
   void _checkIsPassedBeacons(Map<String, Beacon> beaconMap) {
-    print("_checkIsPassedBeacons ${beaconMap.length}");
+    // print("_checkIsPassedBeacons ${beaconMap.length}");
     beaconMap.values.forEach((beacon) {
       _checkIsPassedBeacon(beaconMap, beacon);
     });
@@ -101,13 +104,13 @@ class BeaconService extends GetxService {
 
   /// 비콘을 지나갔는지 판별
   void _checkIsPassedBeacon(Map<String, Beacon> beaconMap, Beacon beacon) {
-    print("_checkIsPassedBeacon ${beacon.id} ${beacon.value.length}");
+    // print("_checkIsPassedBeacon ${beacon.id} ${beacon.value.length}");
 
     beacon.slice(_SLICE_SECONDS);
     if (beacon.isNotEmpty) {
       final result = _checkPassed(beacon.value);
-      print(
-          "${beacon.updated} ${result.isPassed} ${result.direction} ${result.isPassed ? beacon.list[result.index].timestamp.toString() : ""}");
+      // print(
+      //     "${beacon.updated} ${result.isPassed} ${result.direction} ${result.isPassed ? beacon.list[result.index].timestamp.toString() : ""}");
 
       if (result.isPassed) {
         _sensorData.value.add(Pass(
@@ -155,7 +158,6 @@ class BeaconService extends GetxService {
 
   /// pass 데이터 전송
   void _sending(SensorData sensorData) {
-    print("_sending");
     sensorDataApi(sensorData);
     sensorData.clear();
   }

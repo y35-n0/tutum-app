@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 
 import 'package:tutum_app/app/constant/bluetooth_constant.dart';
 import 'package:tutum_app/app/util/server_api.dart';
+import 'package:tutum_app/app/util/util.dart';
 import 'package:tutum_app/models/device.dart';
 import 'package:tutum_app/models/sensor_data.dart';
 import 'package:tutum_app/models/sensors/capacity.dart';
@@ -41,6 +42,7 @@ class SensorService extends GetxService {
   final Rx<String> _address = "".obs;
   final Rx<String> _name = "".obs;
   final Rxn<BluetoothConnection> _connection = Rxn<BluetoothConnection>();
+  final Rxn<DateTime> _connectedTime = Rxn<DateTime>();
 
   // 데이터 관련
   final RxList<int> _rawData = <int>[].obs;
@@ -63,6 +65,11 @@ class SensorService extends GetxService {
   String get sensorName => _name.value;
 
   bool get sensorIsConnected => _connection.value?.isConnected ?? false;
+
+  String get sensorConnectedTime => _connectedTime.value == null ? "" : Util.formatter.format(_connectedTime.value!);
+
+  SensorData get sensorData => _sensorData.value;
+
 
   // 연결된 기기
   final RxMap<String, BluetoothDevice> _bondedDevicesMap =
@@ -207,6 +214,7 @@ class SensorService extends GetxService {
         _gettingRawData(rawData);
       });
 
+      _connectedTime.value = DateTime.now();
       log("connected");
       return true;
     } catch (error) {

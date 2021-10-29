@@ -14,6 +14,8 @@ class Oxygen {
 
   num get value => _oxygen;
 
+  List<dynamic> get data => [timestamp, value];
+
   Oxygen.fromIntList(List<int> list) {
     this._oxygen = Uint8List.fromList(list).buffer.asFloat32List().toList()[0];
     this._timestamp = DateTime.now();

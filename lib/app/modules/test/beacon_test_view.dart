@@ -32,7 +32,7 @@ class BeaconTestView extends StatelessWidget {
       return [const Text("Turn on Bluetooth")];
     } else {
       return [
-        Text("PASSED ${""}"),
+        Text("PASSED ${BeaconService.to.sensorData.pass}"),
         Flexible(
           child: Column(
             children: BeaconService.to.beacons.map((beacon) {

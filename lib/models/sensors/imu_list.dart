@@ -16,6 +16,8 @@ class ImuList {
 
   bool get isEmpty => _list.isEmpty;
 
+  List<dynamic>? get data => isEmpty ? null : [timestamp, value.last];
+
   void setTimestamp() {
     this._timestamp = DateTime.now();
   }
@@ -42,5 +44,4 @@ class ImuList {
   void clear() {
     _list.clear();
   }
-
 }

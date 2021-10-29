@@ -13,6 +13,8 @@ class Capacity {
 
   num get value => _capacity;
 
+  List<dynamic> get data => [timestamp, value];
+
   Capacity.fromIntList(List<int> list) {
     this._capacity = Util.complement((list[0] << 8) | list[1]) * 8 / 32768;
     this._timestamp = DateTime.now();

@@ -14,6 +14,8 @@ class Temperature {
 
   num get value => _temperature;
 
+  List<dynamic> get data => [timestamp, value];
+
   Temperature.fromIntList(List<int> list) {
     this._temperature =
         Uint8List.fromList(list).buffer.asFloat32List().toList()[0];

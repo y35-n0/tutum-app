@@ -34,6 +34,12 @@ class SensorData {
     }
   }
 
+  List<dynamic>? get imu => _imuList.data;
+  List<dynamic>? get capacity => _capacity?.data;
+  List<dynamic>? get temperature => _temperature?.data;
+  List<dynamic>? get oxygen => _oxygen?.data;
+  List<dynamic>? get pass => _pass?.data;
+
   String get json => jsonEncode(toListMap());
 
   List<Map<String, dynamic>> toListMap() {

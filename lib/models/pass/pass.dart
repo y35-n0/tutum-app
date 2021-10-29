@@ -17,14 +17,19 @@ class Pass {
   final DateTime _timestamp;
   final DIRECTION _direction;
 
+  String get timestamp => Util.formatter.format(_timestamp);
+
   String get json => jsonEncode(toMap());
+
   num get value => _id;
+
+  List<dynamic> get data => [timestamp, value];
 
   Map<String, dynamic> toMap() {
     log("pass $_timestamp $_id $_direction");
     return {
       "type": "pass_beacon",
-      "timestamp": Util.formatter.format(_timestamp),
+      "timestamp": timestamp,
       "value": value,
     };
   }

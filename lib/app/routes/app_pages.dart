@@ -6,6 +6,7 @@ import 'package:tutum_app/app/modules/home/views/home_view.dart';
 import 'package:tutum_app/app/modules/login/bindings/login_binding.dart';
 import 'package:tutum_app/app/modules/login/views/login_view.dart';
 import 'package:tutum_app/app/modules/root/views/root_view.dart';
+import 'package:tutum_app/app/modules/test/sensor_parsing_test_view.dart';
 import 'package:tutum_app/app/modules/test/test_view.dart';
 import 'package:tutum_app/app/modules/work_setting/views/work_setting_view.dart';
 
@@ -41,6 +42,10 @@ class AppPages {
       GetPage(
         name: Routes.SENSOR_CONNECT,
         page: () => SensorConnectTestView(),
+      ),
+      GetPage(
+        name: Routes.SENSOR_PARSING,
+        page: () => SensorParsingTestView(),
       ),
     ])
   ];

@@ -29,4 +29,5 @@ List<String> developPages = [
   Routes.WORK_SETTING,
   Routes.BEACON,
   Routes.SENSOR_CONNECT,
+  Routes.SENSOR_PARSING,
 ];
