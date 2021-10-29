@@ -33,17 +33,14 @@ class BeaconTestView extends StatelessWidget {
       return [const Text("Turn on Bluetooth")];
     } else {
       return [
+        Text("PASSED ${""}"),
         Flexible(
           child: Column(
             children: BeaconService.to.beacons.map((beacon) {
               return ListTile(
-                leading: Text(
-                  beacon.rssi.toString(),
-                  textAlign: TextAlign.center,
-                ),
-                title: Text(beacon.device.name),
-                subtitle: Text(beacon.device.id.toString()),
-                trailing: Text(beacon.count.toString()),
+                title: Text(beacon.name),
+                subtitle: Text(beacon.address),
+                trailing: Text(beacon.rssi?.toString() ?? ''),
               );
             }).toList(),
           ),

@@ -1,9 +1,11 @@
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:get/get.dart';
-import 'package:tutum_app/models/beacon.dart';
+import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
+import 'package:tutum_app/models/beacon/rssi.dart';
+import 'package:tutum_app/models/beacon/beacon.dart';
+import 'package:tutum_app/models/device.dart';
 
 const SCAN_DURATION = Duration(days: 1);
-const DEVICE_NAME = "TUTUM";
 
 /// 블루투스 상태 관리 및 센서 상태 관리 서비스
 /// [_flutterBlue] 블루투스 사용을 위한 flutter_blue 객체
@@ -17,15 +19,15 @@ class BeaconService extends GetxService {
   final Rx<bool> _isScanning = false.obs;
   final Rx<bool> _isRunning = false.obs;
   final Rxn<ScanResult> _scanResult = Rxn<ScanResult>();
-  final RxList<Beacon> _beacons = <Beacon>[].obs;
 
+  // 데이터 저장
+  final RxMap<String, Beacon> _beacons = <String, Beacon>{}.obs;
   final List<Worker> workers = [];
 
   BluetoothState get bluetoothState => _bluetoothState.value;
+  List<Device> get beacons => getDevices();
 
   bool get isRunning => _isRunning.value;
-
-  List<Beacon> get beacons => _beacons;
 
   @override
   void onInit() {
@@ -41,21 +43,17 @@ class BeaconService extends GetxService {
     workers.addAll([
       ever(_scanResult, (result) {
         result as ScanResult;
-        if (isRunning) {
-          if (result.device.name.startsWith(DEVICE_NAME)) {
-            int index = _beacons.indexWhere(
-                (Beacon _beacon) => _beacon.device.id == result.device.id);
+        if (!isRunning) return;
+        if (!result.device.name.startsWith(DEVICE_NAME)) return;
 
-            if (index == -1) {
-              _beacons.add(Beacon.fromScanResult(result));
-            } else {
-              _beacons[index].update(result);
-              _beacons.refresh();
-            }
-            // TODO: RSSI를 이용한 문 통과 확인 로직
-            // TODO: 데이터 Parsing 및 API 전송
-          }
+        if (!_beacons.containsKey(result.device.name)) {
+          _beacons[result.device.name] = Beacon.fromScanResult(result);
         }
+        _beacons[result.device.name]!.add(Rssi(result.rssi));
+
+        _beacons.refresh();
+        // TODO: RSSI를 이용한 문 통과 확인 로직
+        // TODO: 데이터 Parsing 및 API 전송
       }),
 
       /// isScanning에 따라서 isRunning 도 변경함.
@@ -71,7 +69,7 @@ class BeaconService extends GetxService {
   /// Beacon 스캔 시작
   void run() {
     if (!isRunning) {
-      _beacons.value = [];
+      _beacons.clear();
       _flutterBlue.startScan(
         timeout: SCAN_DURATION,
         allowDuplicates: true,
@@ -86,6 +84,12 @@ class BeaconService extends GetxService {
       _flutterBlue.stopScan();
       _isRunning(false);
     }
+  }
+
+  // for test
+  /// device 반환
+  List<Device> getDevices() {
+    return _beacons.values.map<Device>((value) => value.device).toList();
   }
 
   /// 종료할 때 worker들 모두 종료

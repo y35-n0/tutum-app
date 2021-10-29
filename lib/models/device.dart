@@ -5,20 +5,19 @@ class Device {
   Device({
     required this.address,
     required this.name,
-    required this.isConnected,
+    this.isConnected,
     this.rssi,
   });
 
   late String address;
   late String name;
-  late bool isConnected;
+  late bool? isConnected;
   late int? rssi;
 
   Device.fromScanResult(FB.ScanResult result) {
     this.address = result.device.id.toString();
     this.name = result.device.name;
     this.rssi = result.rssi;
-    this.isConnected = false;
   }
 
   Device.fromBluetoothDiscoveryResult(FBS.BluetoothDiscoveryResult result) {
@@ -26,13 +25,11 @@ class Device {
     this.name = result.device.name ?? '';
     this.rssi = result.rssi;
     this.isConnected = false;
-
   }
 
   Device.fromBluetoothDeviceOfFBS(FBS.BluetoothDevice device) {
     this.address = device.address;
     this.name = device.name ?? '';
     this.isConnected = device.isConnected;
-
   }
 }

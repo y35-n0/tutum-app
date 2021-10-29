@@ -1,3 +1,5 @@
+const DEVICE_NAME = "TUTUM";
+
 const PAIRING_PIN = '0216';
 
 const COUNT_START = 0;
