@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:trotter/trotter.dart';
+import 'package:tutum_app/models/pass/expression.dart';
 
 /// Theil-Sen 알고리즘
 /// 2차원 식 추정
@@ -12,16 +13,10 @@ class TheilSen {
   late num _b;
   late num _c;
 
-  num get a => _a;
-
-  num get b => _b;
-
-  num get c => _c;
-
   Map<num, num> get data => _data;
 
   /// set [_data] from [x], [y]
-  void calculate(List<num> y, [List<num>? x]) {
+  Expression calculate(List<num> y, [List<num>? x]) {
     if (x == null) {
       _data = y.asMap();
     } else {
@@ -31,6 +26,8 @@ class TheilSen {
     _calculateA();
     _calculateB();
     _calculateC();
+
+    return Expression(_a, _b, _c);
   }
 
   void _calculateA() {
@@ -55,8 +52,8 @@ class TheilSen {
     List<num> list = [];
 
     for (final comb in combs()) {
-      list.add(((comb[1].value - a! * pow(comb[1].key, 2)) -
-              (comb[0].value - a! * pow(comb[0].key, 2))) /
+      list.add(((comb[1].value - _a * pow(comb[1].key, 2)) -
+              (comb[0].value - _a * pow(comb[0].key, 2))) /
           (comb[1].key - comb[0].key));
     }
 
@@ -67,7 +64,7 @@ class TheilSen {
     List<num> list = [];
 
     for (final datum in _data.entries) {
-      list.add((datum.value - a! * pow(datum.key, 2) - b! * datum.key));
+      list.add((datum.value - _a * pow(datum.key, 2) - _b * datum.key));
     }
     _c = _calculateMedian(list);
   }

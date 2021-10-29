@@ -1,8 +1,8 @@
 import 'dart:collection';
 
 import 'package:flutter_blue/flutter_blue.dart';
-import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
-import 'package:tutum_app/models/beacon/rssi.dart';
+import 'package:tutum_app/app/constant/bluetooth_constant.dart';
+import 'package:tutum_app/models/pass/rssi.dart';
 import 'package:tutum_app/models/device.dart';
 
 /// Rssi 데이터를 관리하는 리스트 클래스
@@ -21,7 +21,7 @@ class Beacon {
 
   String get address => _address;
 
-  String get id => _name.substring(DEVICE_NAME.length);
+  int get id => int.parse(_name.substring(DEVICE_NAME.length));
 
   List<int> get value => _rssiQueue.map((Rssi rssi) => rssi.rssi).toList();
 

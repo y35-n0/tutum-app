@@ -5,7 +5,7 @@ import 'dart:developer';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:get/get.dart';
 
-import 'package:tutum_app/app/constant/bluetooth_constrant.dart';
+import 'package:tutum_app/app/constant/bluetooth_constant.dart';
 import 'package:tutum_app/app/util/server_api.dart';
 import 'package:tutum_app/models/device.dart';
 import 'package:tutum_app/models/sensor_data.dart';

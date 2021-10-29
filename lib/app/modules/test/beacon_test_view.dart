@@ -5,7 +5,6 @@ import 'package:tutum_app/app/constant/ui_constants.dart';
 import 'package:tutum_app/services/beacon_service.dart';
 
 class BeaconTestView extends StatelessWidget {
-  final flutterBlue = FlutterBlue.instance;
   final textController = TextEditingController();
 
   @override
@@ -29,7 +28,7 @@ class BeaconTestView extends StatelessWidget {
   }
 
   List<Widget> _getBody() {
-    if (BeaconService.to.bluetoothState != BluetoothState.on) {
+    if (!BeaconService.to.isEnabled) {
       return [const Text("Turn on Bluetooth")];
     } else {
       return [
