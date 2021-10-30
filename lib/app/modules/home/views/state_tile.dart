@@ -4,18 +4,18 @@ import 'package:intl/intl.dart';
 import 'package:tutum_app/app/constant/custom_theme_data.dart';
 import 'package:tutum_app/app/constant/abnormal_state_constants.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
-import 'package:tutum_app/models/state.dart';
+import 'package:tutum_app/models/state_data.dart';
 
 // FIXME: 근무 상태가 아닐 때 모두 회색으로 표시
 
 /// 상태[state]를 표시할 타일
 /// 상태 종류[state.name], 상태 내용[state.content],
-/// 상태 이상상태 수준[state.level], 변경 시각[state.datetime]을 표시.
+/// 상태 이상상태 수준[state.level], 변경 시각[state.timestamp]을 표시.
 /// 이상상태 수준에 따라 타일의 색[state.color]을 다르게 함.
 class StatusTile extends StatelessWidget {
   const StatusTile({Key? key, required this.state}) : super(key: key);
 
-  final AbnormalState state;
+  final StateData state;
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +63,10 @@ class StatusTile extends StatelessWidget {
         /// 상태 변경 시각
         footer: Center(
           child: Text(
-            state.datetime == null
+            state.timestamp == null
                 ? 'NULL'
                 : DateFormat('yyyy-MM-dd hh:mm:ss.SSS')
-                    .format(state.datetime!),
+                    .format(state.timestamp!),
             textAlign: TextAlign.center,
           ),
         ),

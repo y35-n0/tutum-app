@@ -5,7 +5,7 @@ import 'package:tutum_app/app/routes/app_pages.dart';
 import 'package:tutum_app/services/auth_service.dart';
 import 'package:tutum_app/services/beacon_service.dart';
 import 'package:tutum_app/services/sensor_service.dart';
-import 'package:tutum_app/services/abnormal_state_service.dart';
+import 'package:tutum_app/services/state_service.dart';
 
 void main() {
   runApp(

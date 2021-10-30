@@ -23,24 +23,20 @@ const Map<String, dynamic> STATUS_LEVEL_MAP = {
   },
   '블루투스 연결 상태': {
     '연결됨': LEVEL.GOOD,
-    '미연결': LEVEL.CAUTION,
+    '연결 안 됨': LEVEL.CAUTION,
   },
   'LTE 통신 상태': {
     '양호': LEVEL.GOOD,
     '통신음영': LEVEL.CAUTION,
   },
   '안전모 착용 여부': {
-    '착용': LEVEL.GOOD,
-    '미착용': LEVEL.CAUTION,
+    '안전모 착용': LEVEL.GOOD,
+    '안전모 미착용': LEVEL.CAUTION,
   },
-  '낙상 및 추락': {
-    '미탐지': LEVEL.GOOD,
-    '낙상': LEVEL.WARNING,
-    '추릭': LEVEL.DANGER,
-  },
-  '산소': {
+  '공기 중 산소 농도': {
     '양호': LEVEL.GOOD,
-    '산소부족': LEVEL.DANGER,
+    '산소 과다': LEVEL.WARNING,
+    '산소 결핍': LEVEL.DANGER,
   },
   '기온': {
     '양호': LEVEL.GOOD,
@@ -49,15 +45,4 @@ const Map<String, dynamic> STATUS_LEVEL_MAP = {
     '경계': LEVEL.WARNING,
     '심각': LEVEL.DANGER,
   },
-  '심박수': {
-    '정상': LEVEL.GOOD,
-    '빈맥': LEVEL.WARNING,
-    '서맥': LEVEL.WARNING,
-  },
-  '산소포화도': {
-    '정상': LEVEL.GOOD,
-    '주의' : LEVEL.CAUTION,
-    '저산소증': LEVEL.DANGER,
-    '매우 심한 저산소증': LEVEL.DANGER,
-  }
 };

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
 import 'package:tutum_app/app/modules/home/views/state_tile.dart';
-import 'package:tutum_app/services/abnormal_state_service.dart';
+import 'package:tutum_app/services/state_service.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({Key? key}) : super(key: key);
