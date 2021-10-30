@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
 import 'package:tutum_app/services/sensor_service.dart';
+import 'package:tutum_app/services/state_service.dart';
 
 // 연결된 센서 데이터 파싱 값 확인
 class SensorParsingTestView extends StatelessWidget {
@@ -78,6 +79,37 @@ class SensorParsingTestView extends StatelessWidget {
                   Text(SensorService.to.sensorData.oxygen?[1].toString() ?? ""),
               subtitle:
                   Text(SensorService.to.sensorData.oxygen?[0].toString() ?? ""),
+            ),
+          ],
+        ),
+        Divider(),
+        Column(
+          children: <Widget>[
+            Text("상태"),
+            ListTile(
+              leading: const Text("Helmet"),
+              title: Text(StateService.to.stateData.helmetState?[1].toString() ?? ""),
+              subtitle:
+              Text(StateService.to.stateData.helmetState?[0].toString() ?? ""),
+              trailing: Text(StateService.to.stateData.helmetState?[2].toString() ?? ""),
+
+            ),
+            ListTile(
+              leading: const Text("Temperature"),
+              title: Text(
+                StateService.to.stateData.temperatureState?[1].toString() ?? ""),
+              subtitle: Text(
+                  StateService.to.stateData.temperatureState?[0].toString() ?? ""),
+              trailing: Text(StateService.to.stateData.temperatureState?[2].toString() ?? ""),
+
+            ),
+            ListTile(
+              leading: const Text("Oxygen"),
+              title:
+              Text(StateService.to.stateData.oxygenState?[1].toString() ?? ""),
+              subtitle:
+              Text(StateService.to.stateData.oxygenState?[0].toString() ?? ""),
+              trailing: Text(StateService.to.stateData.oxygenState?[2].toString() ?? ""),
             ),
           ],
         ),

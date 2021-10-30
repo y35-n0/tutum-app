@@ -14,6 +14,7 @@ import 'package:tutum_app/models/sensors/capacity.dart';
 import 'package:tutum_app/models/sensors/imu.dart';
 import 'package:tutum_app/models/sensors/oxygen.dart';
 import 'package:tutum_app/models/sensors/temperature.dart';
+import 'package:tutum_app/services/state_service.dart';
 
 // FIXME: TUTM => TUTUM
 const SENSOR_NAME = "TUTM";
@@ -329,6 +330,8 @@ class SensorService extends GetxService {
             _sensorData.value.add(data);
             _sensorData.refresh();
             rawData.removeRange(0, DATA_LENGTH[type]!);
+            StateService.to.addSensorData(data);
+
             // print("${data.temperature}");
           } else {
             _isProcessing = false;
@@ -344,6 +347,8 @@ class SensorService extends GetxService {
             _sensorData.value.add(data);
             _sensorData.refresh();
             rawData.removeRange(0, DATA_LENGTH[type]!);
+            StateService.to.addSensorData(data);
+
             // print("${data.capacity}");
           } else {
             _isProcessing = false;
@@ -359,6 +364,8 @@ class SensorService extends GetxService {
             _sensorData.value.add(data);
             _sensorData.refresh();
             rawData.removeRange(0, DATA_LENGTH[type]!);
+            StateService.to.addSensorData(data);
+
             // print("${data.oxygen}");
           } else {
             _isProcessing = false;

@@ -40,7 +40,7 @@ class TemperatureState {
         _temperatureQueue.map((temp) => temp.value).reduce((a, b) => a + b) /
             _temperatureQueue.length;
 
-    this._updated = DateTime.parse(data.timestamp);
+    this._updated = Util.formatter.parse(data.timestamp);
 
     if (_avgTemperature >= 38) {
       _content = "심각";
@@ -61,8 +61,8 @@ class TemperatureState {
     final now = DateTime.now();
 
     while (isNotEmpty &&
-        (this._temperatureQueue.last.data[0] as DateTime).isBefore(now.add(
-            const Duration(
+        Util.formatter.parse(this._temperatureQueue.first.timestamp).isBefore(
+            now.add(-const Duration(
                 seconds: _COLLECTING_TIMES * _COLLECTING_INTERVAL)))) {
       _temperatureQueue.removeFirst();
     }

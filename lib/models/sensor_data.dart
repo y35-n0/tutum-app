@@ -55,9 +55,9 @@ class SensorData {
 
   void clear() {
     _imuList.clear();
-    _capacity = null;
-    _temperature = null;
-    _oxygen = null;
-    _pass = null;
+    // _capacity = null;
+    // _temperature = null;
+    // _oxygen = null;
+    // _pass = null;
   }
 }

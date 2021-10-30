@@ -52,9 +52,9 @@ class StateData {
   }
 
   void clear() {
-    _helmetState = null;
+    // _helmetState = null;
     _temperatureState.slicing();
-    _oxygenState = null;
-    _bluetoothState = null;
+    // _oxygenState = null;
+    // _bluetoothState = null;
   }
 }

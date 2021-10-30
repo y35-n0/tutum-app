@@ -21,6 +21,7 @@ void main() {
           Get.lazyPut(() => StateService());
           Get.lazyPut(() => BeaconService());
           Get.lazyPut(() => SensorService());
+          Get.lazyPut(() => StateService());
         },
       ),
       theme: customThemeData,

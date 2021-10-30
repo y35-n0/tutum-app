@@ -22,7 +22,7 @@ class OxygenState {
 
   OxygenState.fromOxygen(Oxygen data) {
     this._oxygen = data.value;
-    this._timestamp = DateTime.parse(data.timestamp);
+    this._timestamp = Util.formatter.parse(data.timestamp);
 
     if (_oxygen < 18) {
       _content = "산소 결핍";

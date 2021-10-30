@@ -20,7 +20,7 @@ void sensorDataApi(SensorData sensorData) async {
     // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     // print(decodedResponse.toString());
     // sensorData.json;
-    log(sensorData.json);
+    // log(sensorData.json);
   } catch (error) {
     print(error);
   }
@@ -40,7 +40,7 @@ void stateDataApi(StateData stateData) async {
     // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
     // print(decodedResponse.toString());
     // stateData.json;
-    // log(sensorData.json);
+    log(stateData.json);
   } catch (error) {
     print(error);
   }

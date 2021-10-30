@@ -18,10 +18,10 @@ class AppPages {
   static const INITIAL = Routes.LOGIN;
   static final routes = [
     GetPage(name: '/', page: () => RootView(), children: [
-      GetPage(
-        name: Routes.HOME,
-        page: () => HomeView(),
-      ),
+      // GetPage(
+      //   name: Routes.HOME,
+      //   page: () => HomeView(),
+      // ),
       GetPage(
         name: Routes.TEST,
         page: () => TestView(),

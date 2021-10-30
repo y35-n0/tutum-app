@@ -22,7 +22,7 @@ class HelmetState {
 
   HelmetState.fromCapacity(Capacity data) {
     this._capacity = data.value;
-    this._timestamp = DateTime.parse(data.timestamp);
+    this._timestamp = Util.formatter.parse(data.timestamp);
 
     if (_capacity < 260) {
       _content = "안전모 착용";
