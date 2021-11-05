@@ -8,18 +8,21 @@ import 'package:tutum_app/models/state_data.dart';
 import 'package:tutum_app/services/auth_service.dart';
 
 /// call sensor data api
-void sensorDataApi(SensorData sensorData) async {
+void sensorDataApi(SensorData sensorData, int count) async {
   var client = http.Client();
   try {
-    // TODO: API TEST
-    // var response = await client
-    //     .post(Uri.http(TutumApiServer.URL_BASE, "data/insert/all"), body: {
-    //   "id": AuthService.to.loggedInUser.id.toString(),
-    //   "sensorData": sensorData.json,
-    // });
-    // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    // print(decodedResponse.toString());
-    // sensorData.json;
+    // // TODO: API TEST
+    final now = DateTime.now();
+    final id = AuthService.to.loggedInUser.id.toString();
+    print("$now send $id $count");
+    var response = await client.post(
+        Uri.http(TutumApiServer.URL_BASE, "data/insert/all"),
+        body: {
+          "id": id,
+          "sensorData": sensorData.json
+        }.toString());
+    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    print(now.toString() + decodedResponse.toString());
     // log(sensorData.json);
   } catch (error) {
     print(error);
@@ -30,17 +33,18 @@ void sensorDataApi(SensorData sensorData) async {
 void stateDataApi(StateData stateData) async {
   var client = http.Client();
   try {
-    // TODO: API TEST
-    // FIXME: api address
-    // var response = await client
-    //     .post(Uri.http(TutumApiServer.URL_BASE, "worker/update/state"), body: {
-    //   "id": AuthService.to.loggedInUser.id.toString(),
-    //   "stateData": stateData.json,
-    // });
-    // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    // print(decodedResponse.toString());
-    // stateData.json;
-    log(stateData.json);
+    // // TODO: API TEST
+    // // FIXME: api address
+    final id = AuthService.to.loggedInUser.id.toString();
+    var response = await client.post(
+        Uri.http(TutumApiServer.URL_BASE, "worker/update/state"),
+        headers: <String, String>{
+          "Content-Type": "application/json",
+        },
+        body: {'"id"': id, '"state"': stateData.json}.toString());
+    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    // print(decodedResponse.toString() + ' ' + id.toString());
+    // log(stateData.json);
   } catch (error) {
     print(error);
   }

@@ -14,16 +14,16 @@ import 'package:tutum_app/models/sensors/capacity.dart';
 import 'package:tutum_app/models/sensors/imu.dart';
 import 'package:tutum_app/models/sensors/oxygen.dart';
 import 'package:tutum_app/models/sensors/temperature.dart';
+import 'package:tutum_app/services/auth_service.dart';
 import 'package:tutum_app/services/state_service.dart';
 
-// FIXME: TUTM => TUTUM
 const SENSOR_NAME = "TUTM";
 const DISCOVERY_DURATION_SECONDS = 5;
 const TRY_CONNECT_DURATION_SECONDS = 1;
 const TRY_CONNECT_INTERVAL_SECONDS = 1;
 const MAX_CONNECT_RETRY_COUNT = 5;
 const PROCESSING_DATA_INTERVAL = Duration(milliseconds: 200);
-const SENDING_DATA_INTERVAL = Duration(seconds: 1);
+const SENDING_DATA_INTERVAL = Duration(seconds: 10);
 
 /// [_bluetoothState] 블루투스 상태, [isEnable] 블루투스 사용 가능 여부, [_isDiscovering] 스캔 중 여부,
 /// [_address] 연결된 센서 주소, [_connection] 센서 연결 정보
@@ -53,6 +53,7 @@ class SensorService extends GetxService {
   bool _isProcessing = true;
 
   int _count = 0;
+  int _cntSend = 0;
 
   // 파싱된 데이터
   final Rx<SensorData> _sensorData = SensorData().obs;
@@ -67,10 +68,11 @@ class SensorService extends GetxService {
 
   bool get sensorIsConnected => _connection.value?.isConnected ?? false;
 
-  String get sensorConnectedTime => _connectedTime.value == null ? "" : Util.formatter.format(_connectedTime.value!);
+  String get sensorConnectedTime => _connectedTime.value == null
+      ? ""
+      : Util.formatter.format(_connectedTime.value!);
 
   SensorData get sensorData => _sensorData.value;
-
 
   // 연결된 기기
   final RxMap<String, BluetoothDevice> _bondedDevicesMap =
@@ -173,7 +175,8 @@ class SensorService extends GetxService {
     _bondedDevicesMap.clear();
     final bondedDevices = await _flutterBluetoothSerial.getBondedDevices();
     final bondedSensors = bondedDevices
-        .where((BluetoothDevice device) => device.name?.startsWith(SENSOR_NAME) ?? false)
+        .where((BluetoothDevice device) =>
+            device.name?.startsWith(SENSOR_NAME) ?? false)
         .toList();
     bondedSensors.forEach((BluetoothDevice sensor) {
       _bondedDevicesMap[sensor.address] = sensor;
@@ -290,6 +293,7 @@ class SensorService extends GetxService {
 
   /// raw 데이터 처리
   void _gettingRawData(Uint8List rawData) {
+    // print("_gettingRawData $rawData");
     _rawData.addAll(rawData);
   }
 
@@ -297,9 +301,11 @@ class SensorService extends GetxService {
   // TODO: 실행 TEST
   // TODO: 간략하게 만들기
   void _processing(List<int> rawData) {
+    // print(rawData.map((d) => d.toRadixString(16)));
     _isProcessing = true;
     SENSOR_TYPE? type;
     while (_isProcessing) {
+      // log(_count.toString());
       switch (_count) {
         case COUNT_START:
           // 시작 지점 찾기
@@ -312,7 +318,7 @@ class SensorService extends GetxService {
                   rawData.sublist(index - (SIGN_START.length - 1), index + 1)));
 
           if (rawData.length >= LENGTH_START && index > -1) {
-            log("START");
+            log("START $_cntSend");
             _count++;
             rawData.removeRange(0, index + 1);
           } else {
@@ -322,8 +328,8 @@ class SensorService extends GetxService {
 
         case COUNT_TEMPERATURE:
           type = SENSOR_TYPE.TEMPERATURE;
-          _count++;
           if (rawData.length >= DATA_LENGTH[type]!) {
+            _count++;
             final data =
                 Temperature.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
 
@@ -339,8 +345,8 @@ class SensorService extends GetxService {
           break;
         case COUNT_CAPACITY:
           type = SENSOR_TYPE.CAPACITY;
-          _count++;
           if (rawData.length >= DATA_LENGTH[type]!) {
+            _count++;
             final data =
                 Capacity.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
 
@@ -356,8 +362,8 @@ class SensorService extends GetxService {
           break;
         case COUNT_OXYGEN:
           type = SENSOR_TYPE.OXYGEN;
-          _count = 0;
           if (rawData.length >= DATA_LENGTH[type]!) {
+            _count = 0;
             final data =
                 Oxygen.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
 
@@ -372,9 +378,9 @@ class SensorService extends GetxService {
           }
           break;
         default: // imu
-          _count++;
           type = SENSOR_TYPE.IMU;
           if (rawData.length >= DATA_LENGTH[type]!) {
+            _count++;
             final data =
                 Imu.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
 
@@ -402,7 +408,7 @@ class SensorService extends GetxService {
 
   /// sensorData worker
   void _sending(SensorData sensorData) {
-    sensorDataApi(sensorData);
+    sensorDataApi(sensorData, _cntSend++);
     sensorData.clear();
   }
 

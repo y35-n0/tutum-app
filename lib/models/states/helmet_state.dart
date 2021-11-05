@@ -24,10 +24,10 @@ class HelmetState {
     this._capacity = data.value;
     this._timestamp = Util.formatter.parse(data.timestamp);
 
-    if (_capacity < 260) {
-      _content = "안전모 착용";
-    } else {
+    if (_capacity < 245) {
       _content = "안전모 미착용";
+    } else {
+      _content = "안전모 착용";
     }
 
     _level = STATUS_LEVEL_MAP[_type][_content];

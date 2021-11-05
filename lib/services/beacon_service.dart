@@ -158,7 +158,7 @@ class BeaconService extends GetxService {
 
   /// pass 데이터 전송
   void _sending(SensorData sensorData) {
-    sensorDataApi(sensorData);
+    sensorDataApi(sensorData, 0);
     sensorData.clear();
   }
 
