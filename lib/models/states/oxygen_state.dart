@@ -29,14 +29,14 @@ class OxygenState {
     } else if (_oxygen >= 23.5) {
       _content = "산소 과다";
     } else {
-      _content = "양호";
+      _content = "산소 양호";
     }
 
     _level = STATUS_LEVEL_MAP[_type][_content];
   }
 
   Map<String, dynamic> toMap() {
-    log("OxygenState $timestamp $_oxygen $state ");
+    // log("OxygenState $timestamp $_oxygen $state ");
     return {
       "type": "oxygen",
       "timestamp": timestamp,

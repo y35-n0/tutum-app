@@ -32,7 +32,7 @@ class BluetoothState {
   }
 
   Map<String, dynamic> toMap() {
-    log("BluetoothState $timestamp $_isConnected $state ");
+    // log("BluetoothState $timestamp $_isConnected $state ");
     return {
       "type": "bluetooth",
       "timestamp": timestamp,

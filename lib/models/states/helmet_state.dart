@@ -25,16 +25,16 @@ class HelmetState {
     this._timestamp = Util.formatter.parse(data.timestamp);
 
     if (_capacity < 260) {
-      _content = "안전모 착용";
-    } else {
       _content = "안전모 미착용";
+    } else {
+      _content = "안전모 착용";
     }
 
     _level = STATUS_LEVEL_MAP[_type][_content];
   }
 
   Map<String, dynamic> toMap() {
-    log("CapacityState $timestamp $_capacity $state ");
+    // log("CapacityState $timestamp $_capacity $state ");
     return {
       "type": "helmet",
       "timestamp": timestamp,

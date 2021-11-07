@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:tutum_app/app/util/util.dart';
 
@@ -16,12 +17,13 @@ class Capacity {
   List<dynamic> get data => [timestamp, value];
 
   Capacity.fromIntList(List<int> list) {
-    this._capacity = Util.complement((list[0] << 8) | list[1]) * 8 / 32768;
+    // print(list.map((e) => e.toRadixString(16)).toList());
+    this._capacity = Uint8List.fromList(list).buffer.asFloat32List().toList()[0];
     this._timestamp = DateTime.now();
   }
 
   Map<String, dynamic> toMap() {
-    log('capacity $timestamp $value');
+    // log('capacity $timestamp $value');
     return {
       "type": "capacity",
       "timestamp": timestamp,

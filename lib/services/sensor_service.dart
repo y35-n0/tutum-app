@@ -47,6 +47,7 @@ class SensorService extends GetxService {
 
   // 데이터 관련
   final RxList<int> _rawData = <int>[].obs;
+  late List<int> _rawDataMag = <int>[];
   late Worker _rawDataWorker;
   late Worker _sensorDataWorker;
 
@@ -67,10 +68,11 @@ class SensorService extends GetxService {
 
   bool get sensorIsConnected => _connection.value?.isConnected ?? false;
 
-  String get sensorConnectedTime => _connectedTime.value == null ? "" : Util.formatter.format(_connectedTime.value!);
+  String get sensorConnectedTime => _connectedTime.value == null
+      ? ""
+      : Util.formatter.format(_connectedTime.value!);
 
   SensorData get sensorData => _sensorData.value;
-
 
   // 연결된 기기
   final RxMap<String, BluetoothDevice> _bondedDevicesMap =
@@ -173,7 +175,8 @@ class SensorService extends GetxService {
     _bondedDevicesMap.clear();
     final bondedDevices = await _flutterBluetoothSerial.getBondedDevices();
     final bondedSensors = bondedDevices
-        .where((BluetoothDevice device) => device.name?.startsWith(SENSOR_NAME) ?? false)
+        .where((BluetoothDevice device) =>
+            device.name?.startsWith(SENSOR_NAME) ?? false)
         .toList();
     bondedSensors.forEach((BluetoothDevice sensor) {
       _bondedDevicesMap[sensor.address] = sensor;
@@ -337,6 +340,25 @@ class SensorService extends GetxService {
             _isProcessing = false;
           }
           break;
+
+        case COUNT_IMU_NEXT_TEMPERATURE:
+          type = SENSOR_TYPE.IMU;
+
+          if (rawData.length >= DATA_LENGTH[type]!) {
+            _count++;
+            final data = Imu.fromIntList(
+                rawData.sublist(0, DATA_LENGTH[type]!) + _rawDataMag);
+
+            rawData.removeRange(0, DATA_LENGTH[type]!);
+            _sensorData.value.add(data);
+            _sensorData.refresh();
+            // print(
+            //     "${imu.accX} ${imu.accY} ${imu.accZ} ${imu.gyroX} ${imu.gyroY} ${imu.gyroZ} ");
+          } else {
+            _isProcessing = false;
+          }
+          break;
+
         case COUNT_CAPACITY:
           type = SENSOR_TYPE.CAPACITY;
           _count++;
@@ -350,6 +372,34 @@ class SensorService extends GetxService {
             StateService.to.addSensorData(data);
 
             // print("${data.capacity}");
+          } else {
+            _isProcessing = false;
+          }
+          break;
+
+        case COUNT_MAG_NEXT_CAPACITY:
+          type = SENSOR_TYPE.MAG;
+          if (rawData.length >= DATA_LENGTH[type]!) {
+            _count++;
+            _rawDataMag = rawData.sublist(0, DATA_LENGTH[type]);
+            rawData.removeRange(0, DATA_LENGTH[type]!);
+          } else {
+            _isProcessing = false;
+          }
+          break;
+        case COUNT_IMU_NEXT_CAPACITY:
+          type = SENSOR_TYPE.IMU;
+
+          if (rawData.length >= DATA_LENGTH[type]!) {
+            _count++;
+            final data = Imu.fromIntList(
+                rawData.sublist(0, DATA_LENGTH[type]!) + _rawDataMag);
+
+            rawData.removeRange(0, DATA_LENGTH[type]!);
+            _sensorData.value.add(data);
+            _sensorData.refresh();
+            // print(
+            //     "${imu.accX} ${imu.accY} ${imu.accZ} ${imu.gyroX} ${imu.gyroY} ${imu.gyroZ} ");
           } else {
             _isProcessing = false;
           }
@@ -372,19 +422,32 @@ class SensorService extends GetxService {
           }
           break;
         default: // imu
-          _count++;
-          type = SENSOR_TYPE.IMU;
-          if (rawData.length >= DATA_LENGTH[type]!) {
-            final data =
-                Imu.fromIntList(rawData.sublist(0, DATA_LENGTH[type]!));
-
-            rawData.removeRange(0, DATA_LENGTH[type]!);
-            _sensorData.value.add(data);
-            _sensorData.refresh();
-            // print(
-            //     "${imu.accX} ${imu.accY} ${imu.accZ} ${imu.gyroX} ${imu.gyroY} ${imu.gyroZ} ");
+          if (_count % 4 == 1) {
+            type = SENSOR_TYPE.MAG;
+            if (rawData.length >= DATA_LENGTH[type]!) {
+              _count++;
+              _rawDataMag = rawData.sublist(0, DATA_LENGTH[type]);
+              rawData.removeRange(0, DATA_LENGTH[type]!);
+              // log(_rawDataMag.map((e) => e.toRadixString(2)).toString());
+            } else {
+              _isProcessing = false;
+            }
           } else {
-            _isProcessing = false;
+            type = SENSOR_TYPE.IMU;
+
+            if (rawData.length >= DATA_LENGTH[type]!) {
+              _count++;
+              final data = Imu.fromIntList(
+                  rawData.sublist(0, DATA_LENGTH[type]!) + _rawDataMag);
+
+              rawData.removeRange(0, DATA_LENGTH[type]!);
+              _sensorData.value.add(data);
+              _sensorData.refresh();
+              // print(
+              //     "${imu.accX} ${imu.accY} ${imu.accZ} ${imu.gyroX} ${imu.gyroY} ${imu.gyroZ} ");
+            } else {
+              _isProcessing = false;
+            }
           }
           break;
       }

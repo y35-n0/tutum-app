@@ -22,27 +22,27 @@ const Map<String, dynamic> STATUS_LEVEL_MAP = {
     '퇴근': LEVEL.GOOD,
   },
   '블루투스 연결 상태': {
-    '연결됨': LEVEL.GOOD,
-    '연결 안 됨': LEVEL.CAUTION,
+    '블루투스 연결됨': LEVEL.GOOD,
+    '블루투스 연결 안 됨': LEVEL.CAUTION,
   },
   'LTE 통신 상태': {
-    '양호': LEVEL.GOOD,
-    '통신음영': LEVEL.CAUTION,
+    'LTE 양호': LEVEL.GOOD,
+    'LTE 통신음영': LEVEL.CAUTION,
   },
   '안전모 착용 여부': {
     '안전모 착용': LEVEL.GOOD,
     '안전모 미착용': LEVEL.CAUTION,
   },
   '공기 중 산소 농도': {
-    '양호': LEVEL.GOOD,
+    '산소 양호': LEVEL.GOOD,
     '산소 과다': LEVEL.WARNING,
     '산소 결핍': LEVEL.DANGER,
   },
   '기온': {
-    '양호': LEVEL.GOOD,
-    '관심': LEVEL.GOOD,
-    '주의' : LEVEL.CAUTION,
-    '경계': LEVEL.WARNING,
-    '심각': LEVEL.DANGER,
+    '온도 양호': LEVEL.GOOD,
+    '온도 관심': LEVEL.GOOD,
+    '온도 주의' : LEVEL.CAUTION,
+    '온도 경계': LEVEL.WARNING,
+    '온도 심각': LEVEL.DANGER,
   },
 };

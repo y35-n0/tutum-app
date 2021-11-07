@@ -22,7 +22,7 @@ class Oxygen {
   }
 
   Map<String, dynamic> toMap() {
-    log("oxygen $timestamp $value");
+    // log("oxygen $timestamp $value");
     return {
       "type": "oxygen",
       "timestamp": timestamp,

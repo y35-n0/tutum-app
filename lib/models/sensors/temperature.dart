@@ -23,7 +23,7 @@ class Temperature {
   }
 
   Map<String, dynamic> toMap() {
-    log("temperature $timestamp $value");
+    // log("temperature $timestamp $value");
     return {
       "type": "temperature",
       "timestamp": timestamp,

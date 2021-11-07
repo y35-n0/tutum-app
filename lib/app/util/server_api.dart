@@ -11,16 +11,19 @@ import 'package:tutum_app/services/auth_service.dart';
 void sensorDataApi(SensorData sensorData) async {
   var client = http.Client();
   try {
-    // TODO: API TEST
-    // var response = await client
-    //     .post(Uri.http(TutumApiServer.URL_BASE, "data/insert/all"), body: {
-    //   "id": AuthService.to.loggedInUser.id.toString(),
-    //   "sensorData": sensorData.json,
-    // });
-    // var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-    // print(decodedResponse.toString());
-    // sensorData.json;
-    // log(sensorData.json);
+    // // TODO: API TEST
+    final now = DateTime.now();
+    final id = AuthService.to.loggedInUser.id.toString();
+    print("$now send $id");
+    var response = await client.post(
+        Uri.http(TutumApiServer.URL_BASE, "data/insert/all"),
+        body: {
+          "id": id,
+          "sensorData": sensorData.json
+        }.toString());
+    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+    print(now.toString() + decodedResponse.toString());
+    log(sensorData.json);
   } catch (error) {
     print(error);
   }

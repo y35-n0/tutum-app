@@ -43,15 +43,15 @@ class TemperatureState {
     this._updated = Util.formatter.parse(data.timestamp);
 
     if (_avgTemperature >= 38) {
-      _content = "심각";
+      _content = "온도 심각";
     } else if (_avgTemperature >= 35) {
-      _content = "경계";
+      _content = "온도 경계";
     } else if (_avgTemperature >= 33) {
-      _content = "경계";
+      _content = "온도 경계";
     } else if (_avgTemperature >= 31) {
-      _content = "관심";
+      _content = "온도 관심";
     } else {
-      _content = "양호";
+      _content = "온도 양호";
     }
 
     _level = STATUS_LEVEL_MAP[_type][_content];
@@ -69,7 +69,7 @@ class TemperatureState {
   }
 
   Map<String, dynamic> toMap() {
-    log("TemperatureState $timestamp $_avgTemperature $state ");
+    // log("TemperatureState $timestamp $_avgTemperature $state ");
     return {
       "type": "temperature",
       "timestamp": timestamp,

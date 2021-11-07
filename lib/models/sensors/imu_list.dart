@@ -27,7 +27,7 @@ class ImuList {
   }
 
   Map<String, dynamic> toMap() {
-    log("imu $timestamp ${_list.length}");
+    // log("imu $timestamp ${_list.length}");
     return {
       "type": "imu",
       "timestamp": timestamp,
