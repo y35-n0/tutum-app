@@ -140,7 +140,7 @@ class BeaconService extends GetxService {
 
     num predMaxX = -expression.b / (2 * expression.a);
 
-    bool isClose = rawMaxY >= -50;
+    bool isClose = rawMaxY >= -54;
     bool isConcave = expression.a < 0;
 
     bool isPassed = isClose & isConcave;
