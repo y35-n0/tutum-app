@@ -16,11 +16,6 @@ const Map<String, dynamic> STATUS_LEVEL_MAP = {
     '경고': LEVEL.WARNING,
     '위험': LEVEL.DANGER,
   },
-  '근무 상태': {
-    '업무 중': LEVEL.GOOD,
-    '휴식 중': LEVEL.GOOD,
-    '퇴근': LEVEL.GOOD,
-  },
   '블루투스 연결 상태': {
     '블루투스 연결됨': LEVEL.GOOD,
     '블루투스 연결 안 됨': LEVEL.CAUTION,

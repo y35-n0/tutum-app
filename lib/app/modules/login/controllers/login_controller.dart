@@ -75,8 +75,5 @@ class LoginController extends GetxController {
 }
 
 /// 개발용 유저
-List<User> developUsers = [
-  User(id: 1, name: '김예슬'),
-  User(id: 2, name: '양진우'),
-  User(id: 3, name: '유한길'),
-];
+List<User> developUsers = List.generate(16, (i) =>
+  User(id: i, name: 'id$i'), growable: true);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tutum_app/app/constant/ui_constants.dart';
 import 'package:tutum_app/app/modules/login/controllers/login_controller.dart';
+import 'package:tutum_app/models/user.dart';
 
 class LoginView extends GetView<LoginController> {
   @override
@@ -17,24 +18,22 @@ class LoginView extends GetView<LoginController> {
           children: <Widget>[
             Text('사용자 선택', style: Theme.of(context).textTheme.headline6),
             SizedBox(height: UiConstants.PADDING / 2),
-            Obx(
-              () => ToggleButtons(
-                constraints: BoxConstraints.expand(
-                  width: Get.width / (controller.users.length + 1),
-                ),
-                borderRadius: BorderRadius.circular(15),
-                children: controller.users
-                    .map((e) => Padding(
-                          padding: const EdgeInsets.all(UiConstants.PADDING),
-                          child: Text('${e.id} : ${e.name}'),
-                        ))
-                    .toList(),
-                isSelected: controller.isSelected,
-                onPressed: (int index) {
-                  controller.selectUserByIndex(index);
-                },
-              ),
+            ElevatedButton(
+              child: Text("None"),
+              onPressed: () => controller.selectUserByIndex(0),
             ),
+            Obx(() => DropdownButton(
+                value: controller.selectedUserIndex == -1
+                    ? null
+                    : controller.selectedUserIndex,
+                items: controller.users
+                    .map((e) => DropdownMenuItem(
+                        value: e.id as int, child: Text(e.id.toString())))
+                    .toList(),
+                onChanged: (id) {
+                  id as int?;
+                  controller.selectUserByIndex(id ?? -1);
+                })),
           ],
         ),
       ),

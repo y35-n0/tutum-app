@@ -21,7 +21,7 @@ class Beacon {
 
   String get address => _address;
 
-  int get id => int.parse(_name.substring(DEVICE_NAME.length));
+  int get id => 1;//int.parse(_name.substring(DEVICE_NAME.length));
 
   List<int> get value => _rssiQueue.map((Rssi rssi) => rssi.rssi).toList();
 
