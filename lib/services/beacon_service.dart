@@ -13,6 +13,7 @@ import 'package:tutum_app/models/pass/check_is_passed_result.dart';
 import 'package:tutum_app/models/device.dart';
 import 'package:tutum_app/models/sensor_data.dart';
 
+const _RSSI_THRESHOLD= -57;
 const _SLICE_SECONDS = 6;
 const _SCAN_DURATION = Duration(days: 1);
 const _PROCESSING_BEACONS_INTERVAL = Duration(seconds: 1);
@@ -140,7 +141,7 @@ class BeaconService extends GetxService {
 
     num predMaxX = -expression.b / (2 * expression.a);
 
-    bool isClose = rawMaxY >= -54;
+    bool isClose = rawMaxY >= -_RSSI_THRESHOLD;
     bool isConcave = expression.a < 0;
 
     bool isPassed = isClose & isConcave;
