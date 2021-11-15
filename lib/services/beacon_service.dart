@@ -105,7 +105,7 @@ class BeaconService extends GetxService {
 
   /// 비콘을 지나갔는지 판별
   void _checkIsPassedBeacon(Map<String, Beacon> beaconMap, Beacon beacon) {
-    // print("_checkIsPassedBeacon ${beacon.id} ${beacon.value.length}");
+    print("_checkIsPassedBeacon ${beacon.id} ${beacon.value.length}");
 
     beacon.slice(_SLICE_SECONDS);
     if (beacon.isNotEmpty) {
@@ -141,7 +141,7 @@ class BeaconService extends GetxService {
 
     num predMaxX = -expression.b / (2 * expression.a);
 
-    bool isClose = rawMaxY >= -_RSSI_THRESHOLD;
+    bool isClose = rawMaxY >= _RSSI_THRESHOLD;
     bool isConcave = expression.a < 0;
 
     bool isPassed = isClose & isConcave;
